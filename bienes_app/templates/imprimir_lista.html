@@ -1,0 +1,15 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div id="content-main">
+    {% regroup lista|dictsort:"clasificador.denominacion" by clasificador as lista_sorted %}
+    {% for bienes in lista_sorted %}
+        <h3>{{ bienes.grouper }}</h3>
+        <ul>
+        {% for bien in bienes.list|dictsort:"denominacion" %}
+            <li>{{ bien.denominacion }}: {{ bien.costo }} {{ bien.moneda }}</li>
+        {% endfor %}
+        </ul>
+    {% endfor %}
+</div>
+{% endblock %}

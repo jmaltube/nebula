@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load static from staticfiles %}
+
+{% block body %} 
+    <div class="product-big-title-area">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="product-bit-title text-center">
+                        <h2>Vidriera</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class="single-product-area">
+        <div class="zigzag-bottom"></div>
+        <div class="container">
+            <div class="row">
+                {% for bien in bienes %}
+                    <div class="col-md-3 col-sm-6">
+                        <div class="single-shop-product">
+                            <div class="product-upper">
+                                <img src="{{ bien.imagen1.url }}" alt="">
+                            </div>
+                            <h2><a href="/catalogo/?bien_id={{ bien.sign_id }}">{{ bien.denominacion|slice:":20" }}</a></h2>
+                            <div class="product-carousel-price">
+                                <ins>${{ bien.costo }}</ins> <!-- <del>$999.00</del> -->
+                            </div>  
+                            {% if request.user.is_authenticated %}
+                                <div class="product-option-shop">
+                                    <form id="add_to_cart" action='/add_to_cart/' method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="bien_id" value={{ bien.sign_id }}>
+                                        <input type="hidden" name="next_url" value={{ request.get_full_path }}>
+                                        <div class="quantity">
+                                            <input type="number" size="10" class="input-text qty text" title="Cantidad" value="1" name="cantidad" min="1" step="1">
+                                        </div>
+                                        
+                                            <button class="add_to_cart_button" type="submit">Add to cart</button>
+                                        
+                                    </form>
+                                </div>
+                            {% endif %}                       
+                        </div>
+                    </div>
+                {% endfor %}                
+                
+        
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="product-pagination text-center">
+                            <nav>
+                                <ul class="pagination">
+                                    <li>
+                                        {% if bienes.has_previous %}
+                                        <a href="?page={{ bienes.previous_page_number }}" aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                        {% endif %}
+                                    </li>
+                                    <li><a href="#"> Página {{ bienes.number }} de {{ bienes.paginator.num_pages }}</a></li>
+                                    <!--
+                                                    <li><a href="#">2</a></li>
+                                                    <li><a href="#">3</a></li>
+                                                    <li><a href="#">4</a></li>
+                                                    <li><a href="#">5</a></li>
+                                                    -->
+                                    <li>
+                                        {% if bienes.has_next %}
+                                        <a href="?page={{ bienes.next_page_number }}">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                        {% endif %}
+
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

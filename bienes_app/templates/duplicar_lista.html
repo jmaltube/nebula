@@ -1,0 +1,28 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<form action={% url 'duplicar-lista' %} method="POST">
+    {% csrf_token %}    
+        <div class="fieldWrapper">            
+            <table>
+                <tr>
+                    <td>
+                        {{ form.margen.errors }}
+                        {{ form.margen.label_tag }} {{ form.margen }}                    
+                    </td>
+                    <td>
+                        <input type="submit" value="Confirmar" />
+                    </td>
+                </tr>
+                {% if form.margen.help_text %}
+                    <tr>
+                        <td>                        
+                            <p class="help">{{ form.margen.help_text|safe }}</p>                        
+                        </td>                    
+                    </tr>   
+                {% endif %}           
+            </table>
+            {{ form.ids }}
+        </div>        
+</form>    
+{% endblock %}

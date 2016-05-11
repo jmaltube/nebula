@@ -1,0 +1,32 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<form action={% url 'modificar-costo' %} method="POST">
+    {% csrf_token %}    
+        <div class="fieldWrapper">            
+            <table>
+                <tr>
+                    <td>
+                        {{ form.tipo.errors }}
+                        {{ form.tipo.label_tag }} {{ form.tipo }}                    
+                    </td>
+                    <td>
+                        {{ form.valor.errors }}
+                        {{ form.valor.label_tag }} {{ form.valor }}                    
+                    </td>
+                    <td>
+                        <input type="submit" value="Confirmar" />
+                    </td>
+                </tr>
+                {% if form.valor.help_text %}
+                    <tr>
+                        <td>                        
+                            <p class="help">{{ form.valor.help_text|safe }}</p>                        
+                        </td>                    
+                    </tr>   
+                {% endif %}           
+            </table>
+            {{ form.ids }}
+        </div>        
+</form>    
+{% endblock %}
