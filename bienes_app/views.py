@@ -134,6 +134,18 @@ class ProveedorAutocomplete(autocomplete.Select2QuerySetView):
             
         return qs
 
+class CorredorAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if not self.request.user.is_authenticated():
+            return Proveedor.objects.none()
+            
+        qs = Proveedor.objects.filter(habilitado=True, corredor=True)
+        
+        if self.q:
+            qs = qs.filter(nombre__icontains=self.q)
+            
+        return qs
+
 class DuplicarListaForm(forms.Form):
     margen = forms.DecimalField(label="Modificar margen (%)",max_digits=10, decimal_places=2,required=True, initial=0)
     ids = forms.CharField(widget = forms.HiddenInput())#, required = False)

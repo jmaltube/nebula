@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.contrib import admin
 from bienes_app.models import (Bien, Proveedor, Compra, Lista, ListaYBien, ListaYClasificador, Clasificador, 
-Marca, Abastecimiento, Rubro, Contacto, Cliente, Pedido, PedidoYBien, ClienteYBien, ClienteYClasificador)
+Marca, Abastecimiento, Rubro, Contacto, Cliente, Pedido, PedidoYBien, ClienteYBien, ClienteYClasificador, Expreso, BienYAtributo, Atributo)
 from dal import autocomplete
 from bienes_app.views import duplicar_bien, duplicar_lista, igualar_costo_proveedor
 from django.db import transaction
@@ -49,6 +49,13 @@ class ClienteYClasificadorForm(forms.ModelForm):
             'clasificador': autocomplete.ModelSelect2(url='clasificador-autocomplete'),                  
         }
 
+class ClienteForm(forms.ModelForm):
+    class Meta:
+        model = Cliente
+        fields = ('__all__')
+        widgets = {
+            'corredor': autocomplete.ModelSelect2(url='corredor-autocomplete'),                  
+        }
 
 class CompraForm(forms.ModelForm):
     class Meta:
@@ -58,8 +65,7 @@ class CompraForm(forms.ModelForm):
             'proveedor': autocomplete.ModelSelect2(url='proveedor-autocomplete'),            
       
         }
-       
-  
+        
 #--------------------INLINES--------------------#         
 class ListaYBienInLine(admin.TabularInline):
     model = ListaYBien
@@ -91,6 +97,11 @@ class ClienteYBienInLine(admin.TabularInline):
     verbose_name = "Descuento especial por bien"
     verbose_name_plural = "Descuentos especiales por bienes"                
 
+class BienYAtributoInLine(admin.TabularInline):
+    model = BienYAtributo 
+    extra = 0    
+    verbose_name = "Atributo"
+    verbose_name_plural = "Atributos"
 
 class ClienteYClasificadorInLine(admin.TabularInline):
     model = ClienteYClasificador
@@ -172,7 +183,7 @@ class BienAdmin(admin.ModelAdmin):
     )
     
     
-    inlines = (CompraInLine,)
+    inlines = (BienYAtributoInLine, CompraInLine,)
     list_display = ('codigo','denominacion','clasificador','marca','costo','moneda',costo_base_proveedor_colored)
     list_filter = ('clasificador', 'proveedor', 'marca')
     list_editable = ['costo']
@@ -186,7 +197,7 @@ class BienAdmin(admin.ModelAdmin):
 
 
 class ClasificadorAdmin(admin.ModelAdmin):
-    readonly_fields = ['get_bienes']
+    readonly_fields = ('get_bienes',)
             
     def get_bienes(self, obj):        
         return format_html_join(
@@ -199,20 +210,36 @@ class ClasificadorAdmin(admin.ModelAdmin):
     
     
 class ProveedorAdmin(admin.ModelAdmin):
+    def get_fecha_alta(self, obj):
+        return obj.fecha_alta
+    get_fecha_alta.short_description = 'Fecha de alta'
+    
+    readonly_fields = ('get_fecha_alta',)
     fieldsets = (
-        ('Datos generales',{'fields':('razon_social','nombre_fantasia','telefono','fax','website','email_oficial','tipo','direccion','codigo_postal','partido','localidad','provincia','pais','contactos')}),        
-        ('Datos comerciales',{'classes':('collapse',),'fields':('cuit','condicion_comercial','forma_entrega','iva','fecha_incorporacion','tipo_factura','real','indirecto','agente_perc_iibb','agente_perc_iigg','agente_perc_iva','agente_perc_ss')})
+        ('Datos generales',{'fields':('razon_social','nombre_fantasia','get_fecha_alta','telefono','fax','website','email','tipo','direccion','codigo_postal','partido','localidad','provincia','pais','contactos')}),        
+        ('Datos comerciales',{'classes':('collapse',),'fields':('cuit','condicion_comercial','forma_entrega','iva','tipo_factura','corredor','indirecto','agente_perc_iibb','agente_perc_iigg','agente_perc_iva','agente_perc_ss')})
     )  
-    filter_horizontal = ['contactos']
+    #filter_horizontal = ['contactos']
     
 class ClienteAdmin(admin.ModelAdmin):
+    def get_fecha_alta(self, obj):
+        return obj.fecha_alta
+    get_fecha_alta.short_description = 'Fecha de alta'
+    
+    readonly_fields = ('get_fecha_alta',)
     inlines = (ClienteYClasificadorInLine, ClienteYBienInLine)    
-    filter_horizontal = ['contactos']    
+    #filter_horizontal = ['contactos']    
     list_display = ('razon_social', 'nombre_fantasia', 'habilitado')
-    list_filter = ['razon_social', 'nombre_fantasia']
+    list_filter = ['lista']
     ordering = ['nombre_fantasia']
-    search_fields = ['nombre_fantasia']    
-
+    search_fields = ['nombre_fantasia', 'razon_social', 'direccion', 'cuit', 'telefono', 'email', 'localidad', 'provincia' ]    
+    form = ClienteForm
+    fieldsets = (
+        ('Datos generales',{'fields':('user','lista','razon_social','nombre_fantasia','rubro','get_fecha_alta','habilitado','expreso','corredor','telefono','email','website','direccion','codigo_postal','partido','localidad','provincia','pais','contactos')}),        
+        ('Datos comerciales',{'classes':('collapse',),'fields':('cuit','comprobante_cuit','condicion_comercial','informe_economico','limite_credito','iva','forma_entrega','alerta','mayorista','tipo_factura','agente_perc_iibb','agente_perc_iigg','agente_perc_iva','agente_perc_ss', 'jurisdiccion_iibb')})
+    )
+    
+    
     class Media:
         css = { "all" : ("css/hide_admin_original.css",) }
               
@@ -231,11 +258,11 @@ class CompraAdmin(admin.ModelAdmin):
         return obj.bien.clasificador
     get_bien_clasificador.short_description = "clasificador"
         
-    list_display = ('proveedor', 'bien', 'get_bien_clasificador', 'costo', 'moneda', 'dto1', 'dto2', 'dto3')
-    list_filter = ('proveedor',)
-    search_fields = ('bien',)
+    list_display = ('proveedor', 'bien','get_bien_clasificador', 'base_costeo','costo', 'moneda', 'dto1', 'dto2', 'dto3')
+    list_filter = ('proveedor__razon_social','bien__clasificador')
+    search_fields = ('proveedor__razon_social','bien__clasificador__denominacion')
     ordering = ('proveedor', 'bien')
-    list_editable = ('costo',)
+    list_editable = ('costo','dto1', 'dto2', 'dto3')
 
 #--------------------REGISTERS--------------------#
 #admin.site.unregister(User)
@@ -248,6 +275,8 @@ admin.site.register(Compra, CompraAdmin)
 admin.site.register(Lista, ListaAdmin)
 admin.site.register(Clasificador,ClasificadorAdmin)
 admin.site.register(Marca)
+admin.site.register(Atributo)
+admin.site.register(Expreso)
 admin.site.register(Abastecimiento)
 admin.site.register(Contacto)
 admin.site.register(Pedido, PedidoAdmin)

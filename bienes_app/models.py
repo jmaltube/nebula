@@ -9,6 +9,26 @@ from site_app.models import Moneda
 from django.core.signing import Signer
 import operator
 
+IVA = [('RI','Responsable Inscripto'), ('EXC','Excento'), ('MON', 'Monotributista'), ('NOR', 'No Responsable')]
+
+CondicionComercial = [('30F','30 días F/F'), ('40F','40 días F/F'),('60F', '60 días F/F'),
+        ('C40', 'Cheque contra entrega 40 días F/F'),('CDO', 'Contado'),('EFT', 'Efectivo'),
+        ('TRF', 'Transferencia')
+        ]         
+
+FormaEntrega = [('REI','Se retira en nuestras instalaciones'),
+        ('EEI','Se entrega en nuestras instalaciones'),
+        ('RDI', 'Se retira de nuestras instalaciones')                                           
+        ]         
+
+TipoFactura = [('FTA','Factura A'), ('FTB','Factura B'),('FTA','Factura A'),
+        ('FTC','Factura C'),('FTE','Factura E'),('FTM','Factura M'),
+        ('NCA','Nota de crédito A'),('NCB','Nota de crédito B'),('NCC','Nota de crédito C'),
+        ('NCE','Nota de crédito E'),('NCM','Nota de crédito M'),('NDA','Nota de débito A'),
+        ('NDB','Nota de débito B'),('NDC','Nota de débito C'),('NDE','Nota de débito E'),
+        ('NDM','Nota de débito M')                                               
+        ]   
+
 class Abastecimiento(models.Model):
     denominacion = models.CharField(max_length=50) 
 
@@ -44,24 +64,26 @@ class Clasificador(models.Model):
     rubro = models.ForeignKey(Rubro)
     
     def __str__(self):
-        return self.denominacion    
-        
+        return self.denominacion + " | " + self.rubro.denominacion 
+
+    def __unicode__(self):
+        return self.denominacion + " | " + self.rubro.denominacion 
+
     class Meta:
         ordering = ["denominacion"]
         verbose_name_plural = "Clasificadores"
 
 class Contacto(models.Model):
     Cargo = [('COM','Comprador'), ('VEN','Vendedor'), ('COB', 'Cobrador'),
-            ('PAG', 'Pagos'), ('DIR', 'Director'), ('ADM', 'Administración'),
-            ('SOC', 'Socio/Dueño'),('OTR', 'Otro')                    
+            ('DIR', 'Director'), ('SOC', 'Socio/Dueño'),('OTR', 'Otro')
             ]
             
-    nombre_apellido = models.CharField(verbose_name="Nombre y apellido",max_length=100)
-    cargo = models.CharField(max_length=3, choices=Cargo)
-    telefono = models.CharField(max_length=50)
-    celular = models.CharField(max_length=50)
-    email = models.EmailField()
-    horario = models.CharField(verbose_name="Dias y horas de atención",max_length=50)
+    nombre_apellido = models.CharField(verbose_name="Nombre y apellido",max_length=100, blank=True, null=True)
+    cargo = models.CharField(max_length=3, choices=Cargo, default='OTR')
+    telefono = models.CharField(max_length=50,blank=True, null=True)
+    celular = models.CharField(max_length=50,blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    horario = models.CharField(verbose_name="Dias y horas de atención",max_length=50,blank=True, null=True)
     
     def __str__(self):
         return self.nombre_apellido
@@ -72,56 +94,37 @@ class Contacto(models.Model):
 
 
 class Proveedor(models.Model):
-    IVA = [('RI','Responsable Inscripto'), ('EXC','Excento'), ('MON', 'Monotributista'), ('NOR', 'No Responsable')]
             
     TipoProveedor = [('BIU','Bien de uso'), ('GVA','Gastos varios'), ('IMP', 'Impuesto'),
             ('INS', 'Insumo'), ('MPR', 'Materia prima'), ('PTE', 'Producto terminado'),
             ('SVC', 'Servicio'), ('SBP', 'Subproducto')                    
             ]         
 
-    CondicionComercial = [('30F','30 días F/F'), ('40F','40 días F/F'),('60F', '60 días F/F'),
-            ('C40', 'Cheque contra entrega 40 días F/F'),('CDO', 'Contado'),('EFT', 'Efectivo'),
-            ('TRF', 'Transferencia')
-            ]         
-
-    FormaEntrega = [('REI','Se retira en nuestras instalaciones'),
-            ('EEI','Se entrega en nuestras instalaciones'),
-            ('RDI', 'Se retira de nuestras instalaciones')                                           
-            ]         
-
-    TipoFactura = [('FTA','Factura A'), ('FTB','Factura B'),('FTA','Factura A'),
-            ('FTC','Factura C'),('FTE','Factura E'),('FTM','Factura M'),
-            ('NCA','Nota de crédito A'),('NCB','Nota de crédito B'),('NCC','Nota de crédito C'),
-            ('NCE','Nota de crédito E'),('NCM','Nota de crédito M'),('NDA','Nota de débito A'),
-            ('NDB','Nota de débito B'),('NDC','Nota de débito C'),('NDE','Nota de débito E'),
-            ('NDM','Nota de débito M')                                               
-            ]         
-                
     #Datos generales
     razon_social = models.CharField(max_length=50)
-    nombre_fantasia = models.CharField(verbose_name='Nombre de fantasía',max_length=50)
+    nombre_fantasia = models.CharField(verbose_name='Nombre de fantasía',max_length=50,blank=True, null=True)
+    fecha_alta = models.DateField(auto_now_add=True)
     habilitado = models.BooleanField(default=True)
-    telefono = models.CharField(max_length=50)
-    fax = models.CharField(max_length=50)
-    website = models.CharField(max_length=100)
-    email_oficial = models.EmailField()
-    tipo = models.CharField(max_length=3, choices=TipoProveedor)
-    direccion = models.CharField(max_length=100)
-    codigo_postal = models.CharField(max_length=10)
-    partido = models.CharField(max_length=100)
-    localidad = models.CharField(max_length=100)
-    provincia = models.CharField(max_length=100)
-    pais = models.CharField(max_length=100)
-    contactos = models.ManyToManyField(Contacto)    
+    telefono = models.CharField(max_length=50,blank=True, null=True)
+    fax = models.CharField(max_length=50,blank=True, null=True)
+    website = models.CharField(max_length=100,blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    tipo = models.CharField(max_length=3, choices=TipoProveedor,blank=True, null=True)
+    direccion = models.CharField(max_length=100,blank=True, null=True)
+    codigo_postal = models.CharField(max_length=10,blank=True, null=True)
+    partido = models.CharField(max_length=100,blank=True, null=True)
+    localidad = models.CharField(max_length=100,blank=True, null=True)
+    provincia = models.CharField(max_length=100,blank=True, null=True)
+    pais = models.CharField(max_length=100,blank=True, null=True)
+    contactos = models.ManyToManyField(Contacto,blank=True)    
     
     #Datos comerciales
-    cuit = models.CharField(max_length=11, validators=[RegexValidator(r'^\d{1,11}$',message="No cumple con el formato de CUIT/CUIL")])    
-    condicion_comercial = models.CharField(verbose_name='Forma de entrega',max_length=3, choices=CondicionComercial)
-    forma_entrega =  models.CharField(max_length=3, choices=FormaEntrega)
-    iva = models.CharField(verbose_name='Condición frente al IVA',max_length=3, choices=IVA)
-    fecha_incorporacion = models.DateField()
-    tipo_factura = models.CharField(max_length=3, choices=TipoFactura)    
-    real = models.BooleanField(default=True)
+    cuit = models.CharField(max_length=11, blank=True, null=True, validators=[RegexValidator(r'^\d{1,11}$',message="No cumple con el formato de CUIT/CUIL")])    
+    condicion_comercial = models.CharField(max_length=3, choices=CondicionComercial,blank=True, null=True)
+    forma_entrega =  models.CharField(verbose_name='Forma de entrega',max_length=3, choices=FormaEntrega,blank=True, null=True)
+    iva = models.CharField(verbose_name='Condición frente al IVA',max_length=3, choices=IVA,blank=True, null=True)
+    tipo_factura = models.CharField(max_length=3, choices=TipoFactura,blank=True, null=True)    
+    corredor = models.BooleanField(default=False)
     indirecto = models.BooleanField(default=False)
     agente_perc_iibb = models.BooleanField(verbose_name='Agente percepcion de IIBB',default=False)
     agente_perc_iigg = models.BooleanField(verbose_name='Agente percepcion de IIGG',default=False)
@@ -129,12 +132,28 @@ class Proveedor(models.Model):
     agente_perc_ss = models.BooleanField(verbose_name='Agente percepcion de seguridad social',default=False)
             
     def __str__(self):
-        return self.nombre_fantasia
+        return self.razon_social
+
+    def __unicode__(self):
+        return self.razon_social
         
     class Meta:
-        ordering = ["nombre_fantasia","razon_social"]
+        ordering = ["razon_social", "nombre_fantasia"]
         verbose_name_plural = "Proveedores"        
+
+class Atributo(models.Model):
+    titulo = models.CharField(max_length=50)    
+    
+    def __str__(self):
+        return self.titulo
+
+    def __unicode__(self):
+        return self.titulo
         
+    class Meta:
+        ordering = ("titulo",)
+        verbose_name_plural = "Atributos"   
+    
 class Bien(models.Model): 
     Unidad = [('UN','Unidades'),('KG','Kilogramos'),('MT','Metros'),('LT','Litros')]
           
@@ -156,7 +175,7 @@ class Bien(models.Model):
     imagen5 = models.ImageField(upload_to='Bien/', blank=True)
     proveedor = models.ManyToManyField(Proveedor, through='Compra')
     visible = models.BooleanField(default=True, editable=False)
-    
+    atributos = models.ManyToManyField(Atributo, through='BienYAtributo')
     
     def __str__(self):
         return "{0} ({1})".format(self.denominacion, self.codigo)
@@ -164,7 +183,7 @@ class Bien(models.Model):
     def costo_base_proveedor(self):
         try: 
             compra = Compra.objects.get(bien=self, base_costeo=True)
-            return compra.costo
+            return compra.get_costo_final()
         except MultipleObjectsReturned:
             return 0       
         except ObjectDoesNotExist:
@@ -188,19 +207,29 @@ class Bien(models.Model):
         verbose_name_plural = "Bienes"
         permissions = (("action_bien", "Ejecutar acciones"),)
 
+class BienYAtributo(models.Model):
+    bien = models.ForeignKey(Bien)
+    atributo = models.ForeignKey(Atributo)    
+    texto = models.TextField(max_length=9000)
     
+    class Meta:             
+        unique_together = ('bien', 'atributo') 
+    
+    def __str__(self):
+        return self.bien.denominacion  + "||" + self.atributo.titulo 
+        
 class Compra(models.Model):
     base_costeo = models.BooleanField()
     proveedor = models.ForeignKey(Proveedor)
     bien = models.ForeignKey(Bien)
-    ultima_fecha = models.DateField(auto_now_add=True)
-    bulto = models.IntegerField()
+    ultima_fecha = models.DateField(auto_now=True)
+    bulto = models.IntegerField(blank=True, null=True)
     costo = models.DecimalField(max_digits=10, decimal_places=2)
     moneda = models.ForeignKey(Moneda, on_delete=models.SET_NULL, null=True)
-    plazo_entrega = models.PositiveSmallIntegerField()
-    dto1 = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    dto2 = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    dto3 = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    plazo_entrega = models.PositiveSmallIntegerField(blank=True, null=True)
+    dto1 = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    dto2 = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    dto3 = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
       
     def __str__(self):
         return u"%s de: %s" %(self.bien, self.proveedor)
@@ -214,9 +243,18 @@ class Compra(models.Model):
     #def save(self, *args, **kwargs):    
     #    self.full_clean()
     #    return super(Compra, self).save(*args, **kwargs)
-                            
+    def get_costo_final(self):
+        costo = self.costo
+        for dto in [self.dto1,self.dto2,self.dto3]:
+           if dto:
+                costo = costo * (1-dto/100)
+        return round(costo,2)
+        
+        
     class Meta:             
-        unique_together = ('proveedor', 'bien')        
+        unique_together = ('proveedor', 'bien')    
+        verbose_name = "Costo de proveedor"
+        verbose_name_plural = "Costos de proveedores"    
                 
 class Lista(models.Model):
     Tipo = [ ('VTA','Venta'),('VRA', 'Vidriera')]
@@ -343,27 +381,85 @@ class ListaYClasificador(models.Model):
 
     def __str__(self):
         return self.lista.nombre + "||" + self.clasificador.denominacion
+
+class Expreso(models.Model):
+    denominacion = models.CharField(max_length=50 )
+    direccion = models.CharField(max_length=100,blank=True, null=True)
+    telefono = models.CharField(max_length=50,blank=True, null=True)
+    
+    def __str__(self):
+        return self.denominacion
         
-class Cliente(models.Model):
+class Cliente(models.Model):    
+    #Datos generales
     user = models.OneToOneField(User)
     lista = models.ForeignKey(Lista, on_delete=models.SET_NULL, null=True)
     razon_social = models.CharField(max_length=50)
-    nombre_fantasia = models.CharField(max_length=50)
-    direccion = models.CharField(max_length=50)            
-    partido = models.CharField(max_length=50)
-    localidad = models.CharField(max_length=50)
-    provincia = models.CharField(max_length=50)
-    pais = models.CharField(max_length=50)
+    nombre_fantasia = models.CharField(max_length=50,blank=True, null=True)
+    rubro = models.ForeignKey(Rubro)
+    fecha_alta = models.DateField(auto_now_add=True)
     habilitado = models.BooleanField(default=True)
-    contactos = models.ManyToManyField(Contacto, blank=True)        
+    expreso =  models.ForeignKey(Expreso, on_delete=models.SET_NULL, blank=True, null=True)
+    corredor = models.ForeignKey(Proveedor, on_delete=models.SET_NULL, blank=True, null=True)
+    telefono = models.CharField(verbose_name="teléfono oficial", max_length=50,blank=True, null=True)
+    email = models.EmailField(verbose_name="email oficial", max_length=50,blank=True, null=True)
+    website = models.CharField( max_length=100,blank=True, null=True)
+    direccion = models.CharField(max_length=100,blank=True, null=True)            
+    codigo_postal = models.CharField(max_length=10,blank=True, null=True)
+    partido = models.CharField(max_length=50,blank=True, null=True)
+    localidad = models.CharField(max_length=50,blank=True, null=True)
+    provincia = models.CharField(max_length=50,blank=True, null=True)
+    pais = models.CharField(max_length=50,blank=True, null=True)
+    contactos = models.ManyToManyField(Contacto,blank=True)        
+       
+    #Datos comerciales
+    cuit = models.CharField(max_length=11, blank=True, null=True, validators=[RegexValidator(r'^\d{1,11}$',message="No cumple con el formato de CUIT/CUIL")])
+    comprobante_cuit = models.CharField(max_length=50, blank=True, null=True)    
+    condicion_comercial = models.CharField(max_length=3, choices=CondicionComercial,blank=True, null=True)
+    informe_economico = models.CharField(max_length=200, blank=True, null=True)
+    limite_credito = models.DecimalField(verbose_name="Límite de crédito", max_digits=10, decimal_places=2,blank=True, null=True)
+    iva = models.CharField(verbose_name='Condición frente al IVA',max_length=3, choices=IVA,blank=True, null=True)
+    forma_entrega =  models.CharField(max_length=3, choices=FormaEntrega,blank=True, null=True)
+    alerta = models.TextField(max_length=1000,blank=True, null=True)
+    mayorista = models.BooleanField(default=False)
+    tipo_factura = models.CharField(max_length=3, choices=TipoFactura,blank=True, null=True)    
+    agente_perc_iibb = models.BooleanField(verbose_name='Agente percepcion de IIBB',default=False)
+    agente_perc_iigg = models.BooleanField(verbose_name='Agente percepcion de IIGG',default=False)
+    agente_perc_iva = models.BooleanField(verbose_name='Agente percepcion de IVA',default=False)
+    agente_perc_ss = models.BooleanField(verbose_name='Agente percepcion de seguridad social',default=False)
+    jurisdiccion_iibb = models.CharField(max_length=50,blank=True, null=True) 
     
     def __str__(self):
         return self.user.username
+
+class ClienteYClasificador(models.Model):
+    clasificador = models.ForeignKey(Clasificador, on_delete=models.CASCADE)
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)        
+    margen = models.DecimalField(max_digits=10, decimal_places=2)
+    visible = models.BooleanField(default = True)
+        
+    class Meta:             
+        unique_together = ('cliente', 'clasificador')
+
+    def __str__(self):
+        return self.cliente.razon_social + "||" + self.clasificador.denominacion
+
+class ClienteYBien(models.Model):
+    bien = models.ForeignKey(Bien, on_delete=models.CASCADE )
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)        
+    margen = models.DecimalField(max_digits=10, decimal_places=2)
+    visible = models.BooleanField(default = True)
+
+    class Meta:             
+        unique_together = ('cliente', 'bien') 
+    
+    def __str__(self):
+        return self.cliente.razon_social + "||" + self.bien.denominacion
         
 class Pedido(models.Model):
     Status = [ ('ABR','Abierto'),('CHK', 'Checked-out'),('PRE', 'En preparación'), ('COM', 'Completo'), ('CAN', 'Cancelado')]
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
-    fecha_actualizacion = models.DateField(auto_now_add=True)
+    fecha_actualizacion = models.DateField(auto_now=True)
     checked_out = models.BooleanField(default=False)
     completo = models.BooleanField(default=False)
     status = models.CharField(max_length=3, choices=Status, default='ABR')
@@ -388,26 +484,3 @@ class PedidoYBien(models.Model):
         precio = self.pedido.cliente.lista.get_bienes(include_hidden=False, search_bien_id=self.bien.id).costo
         return precio or 0
         
-class ClienteYClasificador(models.Model):
-    clasificador = models.ForeignKey(Clasificador, on_delete=models.CASCADE)
-    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)        
-    margen = models.DecimalField(max_digits=10, decimal_places=2)
-    visible = models.BooleanField(default = True)
-        
-    class Meta:             
-        unique_together = ('cliente', 'clasificador')
-
-    def __str__(self):
-        return self.cliente.razon_social + "||" + self.clasificador.denominacion
-
-class ClienteYBien(models.Model):
-    bien = models.ForeignKey(Bien, on_delete=models.CASCADE )
-    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)        
-    margen = models.DecimalField(max_digits=10, decimal_places=2)
-    visible = models.BooleanField(default = True)
-
-    class Meta:             
-        unique_together = ('cliente', 'bien') 
-    
-    def __str__(self):
-        return self.cliente.razon_social + "||" + self.bien.denominacion
