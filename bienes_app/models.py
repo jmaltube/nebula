@@ -370,12 +370,14 @@ class Lista(models.Model):
             
     def calcular_costo(self, costo, margen, moneda):
         try:
-            impuesto = self.impuesto.valor or 0
-            print (impuesto)
+            if self.impuesto:
+                impuesto = 1+(self.impuesto.valor/100)
+            else:
+                impuesto = 1
             if moneda.moneda == self.moneda.moneda:
-                return round(costo * (1+(margen/100)) * (1+(impuesto/100)),2)
+                return round(costo * (1+(margen/100)) * impuesto,2)
             else:    
-                return round((costo * (1+(margen/100)) * moneda.cotizacion / self.moneda.cotizacion) * (1+(impuesto/100)),2)
+                return round((costo * (1+(margen/100)) * moneda.cotizacion / self.moneda.cotizacion) * impuesto,2)
         except:
             return 0
             
