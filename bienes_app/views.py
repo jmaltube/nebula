@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render_to_response, render
 from dal import autocomplete
-from bienes_app.models import Bien, Compra, Lista, ListaYClasificador, ListaYBien, Clasificador, Proveedor 
+from bienes_app.models import Bien, Compra, Lista, ListaYClasificador, ListaYBien, Clasificador, Proveedor
 from django.http import HttpResponse, HttpResponseRedirect
 from copy import deepcopy
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
@@ -83,7 +83,7 @@ def igualar_costo_proveedor(bien_id):
         return
         
                 
-def modificar_costo(bien_id, tipo, valor):
+def modificar_costo_bien(bien_id, tipo, valor):
     try:
         bien = Bien.objects.get(id=bien_id)
         if tipo == 'POR':
@@ -94,7 +94,18 @@ def modificar_costo(bien_id, tipo, valor):
         bien.save()
     except MultipleObjectsReturned:
         return
+
+def modificar_costo_proveedor(id, tipo, valor):
+    try:
+        opcion_proveedor = Compra.objects.get(id=id)
+        if tipo == 'POR':
+            opcion_proveedor.costo = opcion_proveedor.costo * (1+(valor/100))
+        elif tipo == 'VAL':
+            opcion_proveedor.costo = opcion_proveedor.costo + valor
         
+        opcion_proveedor.save()
+    except MultipleObjectsReturned:
+        return        
 #--------------------PUBLIC--------------------#
 
 class BienAutocomplete(autocomplete.Select2QuerySetView):
@@ -169,30 +180,38 @@ def duplicar_lista_view(request):
         form.fields['ids'].initial = request.GET.get('ids')              
     return render(request, 'duplicar_lista.html', {'title':'Duplicar lista','form':form, 'opts':Lista._meta})        
     
-class ModificarCostoBienForm(forms.Form):
+class ModificarCostoForm(forms.Form):
     Tipo = [('POR','Porcentaje'), ('VAL','Valor fijo')]
     tipo = forms.ChoiceField(label="Modificar por",choices=Tipo, required=True)   
     valor = forms.DecimalField(label="valor",help_text="0-100 para (%) <br> 0-99999999.99 para valores fijos",max_digits=10, decimal_places=2,required=True, initial=10)
-    ids = forms.CharField(widget = forms.HiddenInput())#, required = False)    
+    ids = forms.CharField(widget = forms.HiddenInput())#, required = False)
+    modelo = forms.CharField(widget = forms.HiddenInput())
         
 def modificar_costo_view(request):
     if not request.user.is_authenticated():
         return HttpResponseRedirect('/admin/')
     if request.method == 'POST':
-        form = ModificarCostoBienForm(request.POST)
+        form = ModificarCostoForm(request.POST)
         if form.is_valid():
             tipo = form.cleaned_data['tipo']
             valor = form.cleaned_data['valor']
             ids = form.cleaned_data['ids'].split(",")
+            modelo = form.cleaned_data['modelo']
             
-            for id in ids:                
-                modificar_costo(bien_id=id, tipo=tipo, valor=valor)
-            
-            return HttpResponseRedirect('/admin/bienes_app/bien/')
+            if modelo == 'bien': 
+                for id in ids:                
+                    modificar_costo_bien(bien_id=id, tipo=tipo, valor=valor)
+                return HttpResponseRedirect('/admin/bienes_app/bien/')
+            elif modelo == 'proveedor':
+                for id in ids:                
+                    modificar_costo_proveedor(id=id, tipo=tipo, valor=valor)
+                return HttpResponseRedirect('/admin/bienes_app/compra/')
     else:        
-        form = ModificarCostoBienForm()        
-        form.fields['ids'].initial = request.GET.get('ids')              
-    return render(request, 'modificar_costo_bien.html', {'title':'Modificar costo','form':form,'opts':Bien._meta})    
+        form = ModificarCostoForm()        
+        form.fields['ids'].initial = request.GET.get('ids')
+        form.fields['modelo'].initial = request.GET.get('modelo')
+        
+    return render(request, 'modificar_costo.html', {'title':'Modificar costo','form':form,'opts':Bien._meta})    
 
 #@login_required    
 def imprimir_lista(request, lista_id):

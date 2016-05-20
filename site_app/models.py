@@ -12,4 +12,6 @@ class Moneda(models.Model):
     def __str__(self):
         return u"%s: %s" %(self.moneda, self.cotizacion)
     
+    def __unicode__(self):
+        return u"%s: %s" %(self.moneda, self.cotizacion)
     

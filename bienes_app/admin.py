@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.contrib import admin
 from bienes_app.models import (Bien, Proveedor, Compra, Lista, ListaYBien, ListaYClasificador, Clasificador, 
-Marca, Abastecimiento, Rubro, Contacto, Cliente, Pedido, PedidoYBien, ClienteYBien, ClienteYClasificador, Expreso, BienYAtributo, Atributo)
+Marca, Abastecimiento, Rubro, Contacto, Cliente, Pedido, PedidoYBien, ClienteYBien, ClienteYClasificador, Expreso, BienYAtributo, Atributo, Impuesto)
 from dal import autocomplete
 from bienes_app.views import duplicar_bien, duplicar_lista, igualar_costo_proveedor
 from django.db import transaction
@@ -136,7 +136,16 @@ def modificar_costo_bien_action(modeladmin, request, queryset):
         selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
         #ct = ContentType.objects.get_for_model(queryset.model)
         url = reverse('modificar-costo')
-        return HttpResponseRedirect(url+"?ids=%s" % (",".join(selected)))
+        return HttpResponseRedirect(url+"?modelo=bien&ids=%s" % (",".join(selected)))
+    else:
+        return HttpResponseRedirect("/admin/bienes_app/bien/")
+
+def modificar_costo_proveedor_action(modeladmin, request, queryset): 
+    if request.user.has_perm('bienes_app.action_proveedor'):
+        selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
+        #ct = ContentType.objects.get_for_model(queryset.model)
+        url = reverse('modificar-costo')
+        return HttpResponseRedirect(url+"?modelo=proveedor&ids=%s" % (",".join(selected)))
     else:
         return HttpResponseRedirect("/admin/bienes_app/bien/")
         
@@ -148,15 +157,15 @@ def duplicar_lista_action(modeladmin, request, queryset):
         return HttpResponseRedirect(url+"?ids=%s" % (",".join(selected)))
     else:
         return HttpResponseRedirect("/admin/bienes_app/lista/")
-             
+
 #--------------------ADMINS--------------------#             
 class ListaAdmin(admin.ModelAdmin):   
     inlines = (ListaYClasificadorInLine,ListaYBienInLine)
     list_display = ('nombre','tipo', 'moneda', 'imprimir')
-    list_filter = ['tipo']
-    ordering = ['nombre']
-    search_fields = ['nombre']    
-    actions = [duplicar_lista_action]    
+    list_filter = ('tipo',)
+    ordering = ('nombre',)
+    search_fields = ('nombre',)    
+    actions = (duplicar_lista_action,)    
     duplicar_lista_action.short_description = "Duplicar lista(s)"                        
     
     class Media:
@@ -186,14 +195,14 @@ class BienAdmin(admin.ModelAdmin):
     inlines = (BienYAtributoInLine, CompraInLine,)
     list_display = ('codigo','denominacion','clasificador','marca','costo','moneda',costo_base_proveedor_colored)
     list_filter = ('clasificador', 'proveedor', 'marca')
-    list_editable = ['costo']
-    ordering = ['clasificador', 'codigo']
-    search_fields = ('codigo', 'denominacion')
-    actions = [duplicar_bien_action, igualar_costo_bien_action, modificar_costo_bien_action]
+    list_editable = ('costo',)
+    ordering = ('clasificador', 'codigo',)
+    search_fields = ('codigo', 'denominacion',)
+    actions = (duplicar_bien_action, igualar_costo_bien_action, modificar_costo_bien_action,)
     duplicar_bien_action.short_description = "Duplicar bien(es)"
     igualar_costo_bien_action.short_description = "Igualar al costo del proveedor"   
     modificar_costo_bien_action.short_description = "Modificar costo del bien"
-    #filter_horizontal = ['bienes']
+    #filter_horizontal = ('bienes')
 
 
 class ClasificadorAdmin(admin.ModelAdmin):
@@ -219,7 +228,7 @@ class ProveedorAdmin(admin.ModelAdmin):
         ('Datos generales',{'fields':('razon_social','nombre_fantasia','get_fecha_alta','telefono','fax','website','email','tipo','direccion','codigo_postal','partido','localidad','provincia','pais','contactos')}),        
         ('Datos comerciales',{'classes':('collapse',),'fields':('cuit','condicion_comercial','forma_entrega','iva','tipo_factura','corredor','indirecto','agente_perc_iibb','agente_perc_iigg','agente_perc_iva','agente_perc_ss')})
     )  
-    #filter_horizontal = ['contactos']
+    #filter_horizontal = ('contactos')
     
 class ClienteAdmin(admin.ModelAdmin):
     def get_fecha_alta(self, obj):
@@ -228,11 +237,11 @@ class ClienteAdmin(admin.ModelAdmin):
     
     readonly_fields = ('get_fecha_alta',)
     inlines = (ClienteYClasificadorInLine, ClienteYBienInLine)    
-    #filter_horizontal = ['contactos']    
+    #filter_horizontal = ('contactos')    
     list_display = ('razon_social', 'nombre_fantasia', 'habilitado')
-    list_filter = ['lista']
-    ordering = ['nombre_fantasia']
-    search_fields = ['nombre_fantasia', 'razon_social', 'direccion', 'cuit', 'telefono', 'email', 'localidad', 'provincia' ]    
+    list_filter = ('lista',)
+    ordering = ('nombre_fantasia',)
+    search_fields = ('nombre_fantasia', 'razon_social', 'direccion', 'cuit', 'telefono', 'email', 'localidad', 'provincia' )    
     form = ClienteForm
     fieldsets = (
         ('Datos generales',{'fields':('user','lista','razon_social','nombre_fantasia','rubro','get_fecha_alta','habilitado','expreso','corredor','telefono','email','website','direccion','codigo_postal','partido','localidad','provincia','pais','contactos')}),        
@@ -246,9 +255,9 @@ class ClienteAdmin(admin.ModelAdmin):
 class PedidoAdmin(admin.ModelAdmin):   
     inlines = (PedidoYBienInLine,)
     list_display = ('cliente','fecha_actualizacion', 'status', 'checked_out')
-    list_filter = ['cliente', 'status']
-    ordering = ['cliente', 'fecha_actualizacion']
-    search_fields = ['cliente']    
+    list_filter = ('cliente', 'status')
+    ordering = ('cliente', 'fecha_actualizacion')
+    search_fields = ('cliente',)    
     
     class Media:
         css = { "all" : ("css/hide_admin_original.css",) }
@@ -257,12 +266,33 @@ class CompraAdmin(admin.ModelAdmin):
     def get_bien_clasificador(self, obj):
         return obj.bien.clasificador
     get_bien_clasificador.short_description = "clasificador"
-        
-    list_display = ('proveedor', 'bien','get_bien_clasificador', 'base_costeo','costo', 'moneda', 'dto1', 'dto2', 'dto3')
+    
+    def get_ultima_fecha_modif(self, obj):
+        return obj.ultima_fecha
+    get_ultima_fecha_modif.short_description = 'Fecha Modif.'
+    
+    actions = (modificar_costo_proveedor_action,)
+    readonly_fields = ('get_ultima_fecha_modif',)
+    list_display = ('proveedor', 'bien','get_bien_clasificador', 'get_ultima_fecha_modif', 'base_costeo','costo', 'moneda', 'dto1', 'dto2', 'dto3')
     list_filter = ('proveedor__razon_social','bien__clasificador')
-    search_fields = ('proveedor__razon_social','bien__clasificador__denominacion')
+    search_fields = ('proveedor__razon_social','bien__clasificador__denominacion', 'ultima_fecha')
     ordering = ('proveedor', 'bien')
     list_editable = ('costo','dto1', 'dto2', 'dto3')
+    modificar_costo_proveedor_action.short_description = "Modificar costo."
+
+class ContactoAdmin(admin.ModelAdmin):
+    def clientes(self, obj):
+        return ",".join(str(x) for x in obj.cliente_set.all())
+    clientes.short_description = 'Clientes'
+    
+    def proveedores(self, obj):
+        return ",".join(str(x) for x in obj.proveedor_set.all())
+    proveedores.short_description = 'Proveedores'
+    
+    list_display = ('nombre_apellido','clientes','proveedores','cargo','telefono','celular','email','horario')
+    list_filter = ('cargo',)
+    search_fields = ('nombre_apellido','cliente__razon_social','proveedor__razon_social','telefono','celular','email')
+    #filter_horizontal = ('bienes')
 
 #--------------------REGISTERS--------------------#
 #admin.site.unregister(User)
@@ -278,5 +308,6 @@ admin.site.register(Marca)
 admin.site.register(Atributo)
 admin.site.register(Expreso)
 admin.site.register(Abastecimiento)
-admin.site.register(Contacto)
+admin.site.register(Contacto,ContactoAdmin)
 admin.site.register(Pedido, PedidoAdmin)
+admin.site.register(Impuesto)

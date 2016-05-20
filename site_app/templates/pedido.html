@@ -22,6 +22,7 @@
                 <div class="col-md-8">
                     <div class="product-content-right">
                         <div class="woocommerce">
+                            {% if impuesto %} <a> *Precios con {{ impuesto }} incluido </a> {% endif %}
                             <form method="post" action="#">
                                 <table cellspacing="0" class="shop_table cart">
                                     <thead>

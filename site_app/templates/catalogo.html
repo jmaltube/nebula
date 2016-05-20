@@ -1,7 +1,13 @@
 {% extends "base.html" %}
 {% load static from staticfiles %}
 
+{% block extracss%}
+<link rel="stylesheet" href="{% static 'css/lightgallery.css' %}">
+{% endblock %}
+
 {% block body %} 
+
+                        
     <div class="product-big-title-area">
         <div class="container">
             <div class="row">
@@ -60,9 +66,7 @@
                 <div class="col-md-8">
                     <div class="product-content-right">
                         <div class="product-breadcroumb">
-                            <a href="">Home</a>
-                            <a href="">Category Name</a>
-                            <a href="">Sony Smart TV - 2015</a>
+                            <a>{{ bien.clasificador }}</a>
                         </div>
                         
                         <div class="row">
@@ -72,11 +76,12 @@
                                         <img src="{{ bien.imagen1.url }}" alt="">
                                     </div>
                                     
-                                    <div class="product-gallery">
-                                        {% if bien.imagen2 %} <img src="{{ bien.imagen2.url }}" alt=""> {% endif %} 
-                                        {% if bien.imagen3 %} <img src="{{ bien.imagen3.url }}" alt=""> {% endif %}
-                                        {% if bien.imagen4 %} <img src="{{ bien.imagen4.url }}" alt=""> {% endif %}
-                                        {% if bien.imagen5 %} <img src="{{ bien.imagen5.url }}" alt=""> {% endif %}
+                                    <div class="product-gallery" id="product-gallery"> 
+                                        {% if bien.imagen1 %} <a href="{{ bien.imagen1.url }}"> <img src="{{ bien.imagen1.url }}" alt=""> </a> {% endif %}
+                                        {% if bien.imagen2 %} <a href="{{ bien.imagen2.url }}"> <img src="{{ bien.imagen2.url }}" alt=""> </a> {% endif %} 
+                                        {% if bien.imagen3 %} <a href="{{ bien.imagen3.url }}"> <img src="{{ bien.imagen3.url }}" alt=""> </a> {% endif %}
+                                        {% if bien.imagen4 %} <a href="{{ bien.imagen4.url }}"> <img src="{{ bien.imagen4.url }}" alt=""> </a> {% endif %}
+                                        {% if bien.imagen5 %} <a href="{{ bien.imagen5.url }}"> <img src="{{ bien.imagen5.url }}" alt=""> </a> {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -86,6 +91,7 @@
                                     <h2 class="product-name">{{ bien.denominacion }}</h2>
                                     <div class="product-inner-price">
                                         <ins>${{ bien.costo }}</ins><!-- <del>$800.00</del> -->
+                                        {% if impuesto %} <a> *Precio con {{ impuesto }} incluido </a> {% endif %}
                                     </div>    
                                     {% if request.user.is_authenticated %}
                                         <form action="." class="cart" method="post" >
@@ -98,47 +104,35 @@
                                         </form>   
                                     {% endif %}
                                     <div class="product-inner-category">
-                                        <p>Category: <a href="">Summer</a>. Tags: <a href="">awesome</a>, <a href="">best</a>, <a href="">sale</a>, <a href="">shoes</a>. </p>
+                                        <p>Clasificador: <a>{{ bien.clasificador }}</a> Tags: <a> {{ bien.tags }}</a></p>
                                     </div> 
-                                    
+                                </div>
+                               </div>
+                              </div> 
+                            <div class="row">
+                            <div class="col-sm-6">        
                                     <div role="tabpanel">
                                         <ul class="product-tab" role="tablist">
-                                            <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Description</a></li>
-                                            <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Reviews</a></li>
+                                            {% for atributo in atributos %}
+                                                <li role="presentation" {% if forloop.first %} class="active" {% endif %} ><a href="#{{ atributo.id }}" aria-controls="{{ atributo.id }}" role="tab" data-toggle="tab">{{ atributo.atributo }}</a></li>
+                                            {% endfor %}
                                         </ul>
                                         <div class="tab-content">
-                                            <div role="tabpanel" class="tab-pane fade in active" id="home">
-                                                <h2>Product Description</h2>  
-                                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam tristique, diam in consequat iaculis, est purus iaculis mauris, imperdiet facilisis ante ligula at nulla. Quisque volutpat nulla risus, id maximus ex aliquet ut. Suspendisse potenti. Nulla varius lectus id turpis dignissim porta. Quisque magna arcu, blandit quis felis vehicula, feugiat gravida diam. Nullam nec turpis ligula. Aliquam quis blandit elit, ac sodales nisl. Aliquam eget dolor eget elit malesuada aliquet. In varius lorem lorem, semper bibendum lectus lobortis ac.</p>
-
-                                                <p>Mauris placerat vitae lorem gravida viverra. Mauris in fringilla ex. Nulla facilisi. Etiam scelerisque tincidunt quam facilisis lobortis. In malesuada pulvinar neque a consectetur. Nunc aliquam gravida purus, non malesuada sem accumsan in. Morbi vel sodales libero.</p>
-                                            </div>
-                                            <div role="tabpanel" class="tab-pane fade" id="profile">
-                                                <h2>Reviews</h2>
-                                                <div class="submit-review">
-                                                    <p><label for="name">Name</label> <input name="name" type="text"></p>
-                                                    <p><label for="email">Email</label> <input name="email" type="email"></p>
-                                                    <div class="rating-chooser">
-                                                        <p>Your rating</p>
-
-                                                        <div class="rating-wrap-post">
-                                                            <i class="fa fa-star"></i>
-                                                            <i class="fa fa-star"></i>
-                                                            <i class="fa fa-star"></i>
-                                                            <i class="fa fa-star"></i>
-                                                            <i class="fa fa-star"></i>
-                                                        </div>
-                                                    </div>
-                                                    <p><label for="review">Your review</label> <textarea name="review" id="" cols="30" rows="10"></textarea></p>
-                                                    <p><input type="submit" value="Submit"></p>
+                                        {% for atributo in atributos %}
+                                            
+                                                <div role="tabpanel" {% if forloop.first %} class="tab-pane fade in active" {% else %} class="tab-pane fade" {% endif %} id="{{ atributo.id }}">
+                                                    <h2>{{ atributo.atributo }}</h2>  
+                                                    <p> {{ atributo.texto }}</p>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
+                                            
+                                        {% endfor %}
+                                        </div>   
                                 </div>
                             </div>
                         </div>
+                        
+
+                        
                         
                         
                         <div class="related-products-wrapper">
@@ -146,11 +140,7 @@
                             <div class="related-products-carousel">
                                 <div class="single-product">
                                     <div class="product-f-image">
-                                        <img src="img/product-1.jpg" alt="">
-                                        <div class="product-hover">
-                                            <a href="" class="add-to-cart-link"><i class="fa fa-shopping-cart"></i> Add to cart</a>
-                                            <a href="" class="view-details-link"><i class="fa fa-link"></i> See details</a>
-                                        </div>
+                                       <img id="zoom_01" src="/static/media/product-1.jpg" data-zoom-image="/static/media/product-1.jpg" />
                                     </div>
 
                                     <h2><a href="">Sony Smart TV - 2015</a></h2>
@@ -161,10 +151,10 @@
                                 </div>
                                 <div class="single-product">
                                     <div class="product-f-image">
-                                        <img src="img/product-2.jpg" alt="">
+                                        <img src="/static/media/product-2.jpg" alt="">
                                         <div class="product-hover">
-                                            <a href="" class="add-to-cart-link"><i class="fa fa-shopping-cart"></i> Add to cart</a>
-                                            <a href="" class="view-details-link"><i class="fa fa-link"></i> See details</a>
+                                            <a href="" class="add-to-cart-link">  Add to cart</a>
+                                            <a href="" class="view-details-link">  See details</a>
                                         </div>
                                     </div>
 
@@ -175,7 +165,7 @@
                                 </div>
                                 <div class="single-product">
                                     <div class="product-f-image">
-                                        <img src="img/product-3.jpg" alt="">
+                                        <img src="/static/media/product-3.jpg" alt="">
                                         <div class="product-hover">
                                             <a href="" class="add-to-cart-link"><i class="fa fa-shopping-cart"></i> Add to cart</a>
                                             <a href="" class="view-details-link"><i class="fa fa-link"></i> See details</a>
@@ -190,7 +180,7 @@
                                 </div>
                                 <div class="single-product">
                                     <div class="product-f-image">
-                                        <img src="img/product-4.jpg" alt="">
+                                        <img src="/static/media/product-4.jpg" alt="">
                                         <div class="product-hover">
                                             <a href="" class="add-to-cart-link"><i class="fa fa-shopping-cart"></i> Add to cart</a>
                                             <a href="" class="view-details-link"><i class="fa fa-link"></i> See details</a>
@@ -205,7 +195,7 @@
                                 </div>
                                 <div class="single-product">
                                     <div class="product-f-image">
-                                        <img src="img/product-5.jpg" alt="">
+                                        <img src="/static/media/product-5.jpg" alt="">
                                         <div class="product-hover">
                                             <a href="" class="add-to-cart-link"><i class="fa fa-shopping-cart"></i> Add to cart</a>
                                             <a href="" class="view-details-link"><i class="fa fa-link"></i> See details</a>
@@ -220,7 +210,7 @@
                                 </div>
                                 <div class="single-product">
                                     <div class="product-f-image">
-                                        <img src="img/product-6.jpg" alt="">
+                                        <img src="/static/media/product-6.jpg" alt="">
                                         <div class="product-hover">
                                             <a href="" class="add-to-cart-link"><i class="fa fa-shopping-cart"></i> Add to cart</a>
                                             <a href="" class="view-details-link"><i class="fa fa-link"></i> See details</a>
@@ -235,10 +225,24 @@
                                 </div>                                    
                             </div>
                         </div>
-                        {% endif %}
-                    </div>                    
+                        
+                    </div>
+                    {% endif %}                    
                 </div>
             </div>
         </div>
     </div>
+    
+
+{% endblock %}
+
+{% block extrajs%}
+<script src="{% static 'js/lightgallery.js' %}"></script>
+<script src="{% static 'js/lg-thumbnail.js' %}"></script>
+<script src="{% static 'js/lg-fullscreen.js' %}"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#product-gallery").lightGallery({ thumbnail:true });        
+    });
+</script>
 {% endblock %}

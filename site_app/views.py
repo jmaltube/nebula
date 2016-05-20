@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django import forms
-from bienes_app.models import Lista, Pedido, Bien, PedidoYBien, Clasificador
+from bienes_app.models import Lista, Pedido, Bien, PedidoYBien, Clasificador, BienYAtributo
 from django.core import serializers
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.exceptions import ValidationError, MultipleObjectsReturned, ObjectDoesNotExist
@@ -54,22 +54,22 @@ def catalogo(request):
     else:
         if 'search_button' in request.POST:
             search_form = SearchForm(request.POST)
-            
+            try:
+                del request.session['results']
+            except KeyError:
+                pass             
             if search_form.is_valid():
                 search_string = search_form.cleaned_data.get('search_string').strip()
                 clasificador = search_form.cleaned_data.get('clasificador')
-                try:
-                    del request.session['results']
-                except KeyError:
-                    pass       
-                         
                 bienes = lista.get_bienes(include_hidden=False, search_string=search_string, clasificador=clasificador, cliente=cliente)
                 results = [] 
                 for bien in bienes:
                     result = {'id': signer.sign(bien.id),
                             'denominacion': bien.denominacion,
                             'imagen': bien.imagen1.url,
-                            'costo': "{0:.2f}".format(bien.costo)}
+                            'costo': "{0:.2f}".format(bien.costo),
+                            'tags': bien.tags,
+                            }
                     results.append(result)           
                 
                 if results:            
@@ -87,6 +87,9 @@ def catalogo(request):
         if lista and (bien_id > 0):
             bien = lista.get_bienes(include_hidden=False, search_bien_id=bien_id, cliente=cliente)
             context['bien'] = bien
+            context['impuesto'] = lista.impuesto
+            atributos = BienYAtributo.objects.filter(bien__id=bien.id)
+            context['atributos'] = atributos
             
     try:
         context['search_form'] = search_form
@@ -113,7 +116,8 @@ def pedido(request):
                     'subtotal': "{0:.2f}".format(precio * item.cantidad)
             }
             carrito.append(bien) 
-        context['carrito'] = carrito        
+        context['carrito'] = carrito 
+        context['impuesto'] = lista.impuesto
         return render(request, 'pedido.html',context)
     else:
         return HttpResponseRedirect(reverse('index'))

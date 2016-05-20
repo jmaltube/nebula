@@ -73,6 +73,17 @@ class Clasificador(models.Model):
         ordering = ["denominacion"]
         verbose_name_plural = "Clasificadores"
 
+class Impuesto(models.Model):
+    impuesto = models.CharField(max_length=20, unique=True)
+    valor = models.DecimalField(max_digits=5, decimal_places=2)
+    visible = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return "{0}: {1}%".format(self.impuesto, self.valor)
+    
+    def __unicode__(self):
+        return "{0}: {1}%".format(self.impuesto, self.valor)
+    
 class Contacto(models.Model):
     Cargo = [('COM','Comprador'), ('VEN','Vendedor'), ('COB', 'Cobrador'),
             ('DIR', 'Director'), ('SOC', 'Socio/Dueño'),('OTR', 'Otro')
@@ -168,6 +179,7 @@ class Bien(models.Model):
     sin_stock = models.BooleanField(default=False)
     marca = models.ForeignKey(Marca)
     bulto = models.DecimalField (max_digits=10, decimal_places=2)
+    tags = models.CharField(max_length=100, blank=True, null=True)
     imagen1 = models.ImageField(verbose_name='Imagen principal', upload_to='Bien/', default='Bien/none.png')    
     imagen2 = models.ImageField(upload_to='Bien/', blank=True)
     imagen3 = models.ImageField(upload_to='Bien/', blank=True)
@@ -254,7 +266,8 @@ class Compra(models.Model):
     class Meta:             
         unique_together = ('proveedor', 'bien')    
         verbose_name = "Costo de proveedor"
-        verbose_name_plural = "Costos de proveedores"    
+        verbose_name_plural = "Costos de proveedores" 
+        permissions = (("action_proveedor", "Ejecutar acciones"),)   
                 
 class Lista(models.Model):
     Tipo = [ ('VTA','Venta'),('VRA', 'Vidriera')]
@@ -263,6 +276,7 @@ class Lista(models.Model):
     tipo = models.CharField(max_length=3, choices=Tipo, default='VTA')
     fecha_vigencia = models.DateField(verbose_name="Fecha de entrada en vigencia")
     moneda = models.ForeignKey(Moneda, on_delete=models.SET_NULL, null=True)
+    impuesto = models.ForeignKey(Impuesto, on_delete=models.SET_NULL, blank=True, null=True)
     aclaraciones = models.TextField(null=True, blank=True) 
     bienes = models.ManyToManyField(Bien, through='ListaYBien')   
     clasificadores = models.ManyToManyField(Clasificador, through='ListaYClasificador') 
@@ -278,18 +292,21 @@ class Lista(models.Model):
     
     def get_bienes(self, include_hidden=True, search_bien_id=None, search_string="", clasificador=None, cliente=None):
         if clasificador:
-            lista_clasificador = list(self.listayclasificador_set.filter(clasificador=clasificador))        
+            lista_clasificador = list(self.listayclasificador_set.filter(clasificador=clasificador))
+            lista_bien = list(self.listaybien_set.filter(bien__denominacion__icontains=search_string, bien__clasificador = clasificador))        
         else:
             lista_clasificador = list(self.listayclasificador_set.all())
-            
-        lista_bien = list(self.listaybien_set.filter(bien__denominacion__icontains=search_string))                                            
+            lista_bien = list(self.listaybien_set.filter(bien__denominacion__icontains=search_string ))
+                                                    
         bienes=[]
         
         if cliente:
             if clasificador:
                 cliente_clasificador = cliente.clienteyclasificador_set.filter(clasificador=clasificador)
+                cliente_bien = cliente.clienteybien_set.filter(bien__denominacion__icontains=search_string, bien__clasificador = clasificador)
             else:
                 cliente_clasificador = cliente.clienteyclasificador_set.all()
+                cliente_bien = cliente.clienteybien_set.filter(bien__denominacion__icontains=search_string)
 
             for l in lista_clasificador:
                 if not (not include_hidden and not l.visible):
@@ -303,16 +320,19 @@ class Lista(models.Model):
                 if cl.margen > 0:
                     new_lista_clasificador = ListaYClasificador(clasificador=cl.clasificador, lista=self, margen=cl.margen, visible=cl.visible)
                     lista_clasificador.append(new_lista_clasificador)
-                    
-            cliente_bien = cliente.clienteybien_set.filter(bien__denominacion__icontains=search_string)
+            
+            
             for w in lista_bien:
                 if not (not include_hidden and not w.visible):
-                    for bi in cliente_bien:
-                        if w.bien == bi.bien:
-                            w.margen = bi.margen
-                            bi.margen = -1
-                            break
-
+                    if not cliente_clasificador.filter(clasificador=w.bien.clasificador).exists():
+                        for bi in cliente_bien:
+                            if w.bien == bi.bien:
+                                w.margen = bi.margen
+                                bi.margen = -1
+                                break
+                    else:
+                        w.margen = -1
+                        
             for bi in cliente_bien:
                 if bi.margen > 0:
                     new_lista_bien = ListaYBien(bien=bi.bien, lista=self, margen=bi.margen, visible=bi.visible)
@@ -324,9 +344,9 @@ class Lista(models.Model):
                 for b in l.clasificador.bien_set.filter(Q(denominacion__icontains=search_string) | Q(clasificador__denominacion__icontains=search_string)):                      
                     seen = False
                     for z in lista_bien:                
-                        if z.bien == b:                    
+                        if z.bien == b and z.margen > 0:                    
                             b.costo = self.calcular_costo(costo=b.costo, margen=z.margen, moneda=z.bien.moneda())                            
-                            z.bien.costo = -1
+                            z.margen = -1
                             seen = True
                             break                
                     if not seen:                                       
@@ -338,22 +358,24 @@ class Lista(models.Model):
                 
         for w in lista_bien:
             if not (not include_hidden and not w.visible):
-                if w.bien.costo >= 0:
+                if w.margen > 0:
                     w.bien.costo = self.calcular_costo(costo=w.bien.costo, margen=w.margen, moneda=w.bien.moneda())
                     w.bien.visible = w.visible
                 
                     if w.bien.id == search_bien_id:
                         return w.bien                    
                     bienes.append(w.bien)    
-                    
+        
         return sorted(bienes, key=operator.attrgetter('denominacion'))
             
     def calcular_costo(self, costo, margen, moneda):
         try:
+            impuesto = self.impuesto.valor or 0
+            print (impuesto)
             if moneda.moneda == self.moneda.moneda:
-                return round((costo * (1+(margen/100)) ),2)
+                return round(costo * (1+(margen/100)) * (1+(impuesto/100)),2)
             else:    
-                return round((costo * (1+(margen/100)) * moneda.cotizacion / self.moneda.cotizacion),2)
+                return round((costo * (1+(margen/100)) * moneda.cotizacion / self.moneda.cotizacion) * (1+(impuesto/100)),2)
         except:
             return 0
             
@@ -430,7 +452,10 @@ class Cliente(models.Model):
     jurisdiccion_iibb = models.CharField(max_length=50,blank=True, null=True) 
     
     def __str__(self):
-        return self.user.username
+        return self.razon_social
+
+    def __unicode__(self):
+        return self.razon_social
 
 class ClienteYClasificador(models.Model):
     clasificador = models.ForeignKey(Clasificador, on_delete=models.CASCADE)
@@ -468,7 +493,7 @@ class Pedido(models.Model):
     def get_precio_total(self):   
         total = 0
         for pedidoybien in self.pedidoybien_set.all():   
-            total += self.cliente.lista.get_bienes(search_bien_id=pedidoybien.bien.id).costo * pedidoybien.cantidad
+            total += self.cliente.lista.get_bienes(search_bien_id=pedidoybien.bien.id, cliente=self.cliente).costo * pedidoybien.cantidad
         return total
         
     def get_cantidad_total(self):
@@ -481,6 +506,7 @@ class PedidoYBien(models.Model):
     descuento = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     
     def get_precio(self):
-        precio = self.pedido.cliente.lista.get_bienes(include_hidden=False, search_bien_id=self.bien.id).costo
+        precio = self.pedido.cliente.lista.get_bienes(include_hidden=False, search_bien_id=self.bien.id, cliente=self.pedido.cliente).costo
         return precio or 0
         
+
