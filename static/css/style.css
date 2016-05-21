@@ -1086,10 +1086,13 @@ div.cart-collaterals ul.products li.product:hover .add_to_cart_button {
     margin: 10px 0;
 }
 .single-shop-product div.product-upper {
-    min-height: 250px;
-    min-width: 250px;
-    max-height: 250px;
-    max-width: 250px;
+    width: 250px;
+    height: 270px;
+}
+
+.single-shop-product div.product-upper img {
+    height: 100%;
+    width: 100%;    
 }
 .product-option-shop {
     margin-top: 15px;
