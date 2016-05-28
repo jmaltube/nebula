@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.template import loader
 from django import forms
 from bienes_app.models import Lista, Pedido, Bien, PedidoYBien, Clasificador, BienYAtributo
 from django.core import serializers
@@ -8,6 +9,10 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse,resolve
 from django.contrib.auth import authenticate, login as admin_login, logout as admin_logout
 from django.core.signing import Signer
+from django.core.mail import mail_admins, send_mail
+from django.db.models import Q
+from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy
 
 
 #////////////////////# PUBLIC #////////////////////# 
@@ -56,7 +61,7 @@ def catalogo(request):
             search_form = SearchForm(request.POST)
             try:
                 del request.session['results']
-            except KeyError:
+            except:
                 pass             
             if search_form.is_valid():
                 search_string = search_form.cleaned_data.get('search_string').strip()
@@ -75,8 +80,9 @@ def catalogo(request):
                 if results:            
                     request.session['results'] = results
                 else:
-                    search_form.add_error(None, "No se encontraron resultados")
+                    search_form.add_error(None, _("No se encontraron resultados"))
                 context['search_form'] = search_form
+        
         elif 'add_to_cart_button' in request.POST:
             signed_id = request.POST.get('bien_id',0)
             
@@ -103,20 +109,7 @@ def pedido(request):
     if request.user.is_authenticated():
         lista = get_lista(request)
         context = get_base_context(request)
-        pedido_bienes = PedidoYBien.objects.filter(pedido=context['pedido'])
-        
-        carrito = []
-        for item in pedido_bienes:
-            precio = item.get_precio()
-            bien = {'id': item.bien.sign_id(),
-                    'denominacion': item.bien.denominacion,
-                    'imagen': item.bien.imagen1.url,
-                    'costo': "{0:.2f}".format(precio),
-                    'cantidad': item.cantidad,
-                    'subtotal': "{0:.2f}".format(precio * item.cantidad)
-            }
-            carrito.append(bien) 
-        context['carrito'] = carrito 
+        context['carrito'] = get_pedido_detalle(pedido=context['pedido']) 
         context['impuesto'] = lista.impuesto
         return render(request, 'pedido.html',context)
     else:
@@ -133,7 +126,7 @@ def login(request):
                 admin_login(request, user)
                 return HttpResponseRedirect(reverse('index'))
             else:                
-                login_form.add_error(None, ValidationError('Usuario y/o contraseña incorrectos', code='invalid'))
+                login_form.add_error(None, ValidationError(_('Usuario y/o contraseña incorrectos'), code='invalid'))
         context = get_base_context(request, login_form)
         return render(request, 'index.html',context)
         
@@ -180,6 +173,30 @@ def remove_from_cart(request):
                 pass
     return HttpResponseRedirect(next_url)    
 
+def checkout(request):
+    if request.user.is_authenticated():
+        try:
+            context = get_base_context(request)
+            pedido = context['pedido']
+            pedido.cerrado = True
+            pedido.save()
+            subject = _("Nuevo pedido de: ") + str(pedido.cliente)
+            
+            lista = get_lista(request)
+            
+            context['carrito'] = get_pedido_detalle(pedido=pedido) 
+            context['impuesto'] = lista.impuesto
+            
+            template = loader.get_template('pedido_email.html')
+            
+            message = template.render(context)  
+            mail_admins(subject=subject , message="yeah",fail_silently=False, connection=None, html_message=message)        
+        except Exception as e:
+            pass
+    
+    #print(send_mail(subject="subject", message="message",from_email='juan.altube@nebula.com.ar', recipient_list=('juan.altube@nebula.com.ar',), fail_silently=False, auth_user=None, auth_password=None, connection=None, html_message=None))
+    return HttpResponseRedirect(reverse('pedido'))    
+    
 #////////////////////# PRIVATE #////////////////////#
 
 def get_lista(request):
@@ -193,22 +210,34 @@ def get_lista(request):
 
 def get_pedido(request):
     try:
-        pedido_id = request.session['pedido']
-        pedido = Pedido.objects.get(id=pedido_id)
-    except (Pedido.DoesNotExist, KeyError):
-        try:
-            pedido = Pedido.objects.filter(cliente=request.user.cliente, checked_out=False, completo=False)[0]       
-        except: 
-            pedido = Pedido(cliente=request.user.cliente)
-            pedido.save()
-            
-    request.session['pedido'] = pedido.id
+        pedido = Pedido.objects.filter(cliente=request.user.cliente, entregado=False)[0]       
+    except Exception as e:
+        pedido = Pedido(cliente=request.user.cliente)
+        pedido.save()
+    finally:
+        return pedido
+    
 
-    return pedido
+def get_pedido_detalle(pedido):
+    pedido_bienes = PedidoYBien.objects.filter(pedido=pedido)
+    
+    carrito = []
+    for item in pedido_bienes:
+        precio = item.get_precio()
+        bien = {'id': item.bien.sign_id(),
+                'denominacion': item.bien.denominacion,
+                'codigo': item.bien.codigo,
+                'imagen': item.bien.imagen1.url,
+                'costo': "{0:.2f}".format(precio),
+                'cantidad': item.cantidad,
+                'subtotal': "{0:.2f}".format(precio * item.cantidad)
+        }
+        carrito.append(bien)
+    return carrito
     
 class LoginForm(forms.Form):
-    username = forms.CharField(max_length=11, required=True)
-    password = forms.CharField(widget=forms.PasswordInput, required=True) 
+    username = forms.CharField(label=ugettext_lazy("usuario"),max_length=11, required=True)
+    password = forms.CharField(label=ugettext_lazy("contraseña"),widget=forms.PasswordInput, required=True) 
     
 class SearchForm(forms.Form):
 
@@ -219,8 +248,8 @@ class SearchForm(forms.Form):
         #     self.fields['clasificador'].queryset = lista.clasificadores.all()
     
     #categoria_formfield = forms.ModelChoiceField(widget=forms.Select(attrs={'size':'13', 'onchange':'this.form.action=this.form.submit()'}), queryset=sitio_categoria.objects.none())
-    search_string = forms.CharField(label='Por nombre o descripción',max_length=20, required=False)
-    clasificador = forms.ModelChoiceField(empty_label="Seleccione",queryset=Clasificador.objects.all(), required=False)
+    search_string = forms.CharField(label=ugettext_lazy('Por nombre o descripción'),max_length=20, required=False)
+    clasificador = forms.ModelChoiceField(empty_label=ugettext_lazy("Seleccione"),queryset=Clasificador.objects.all(), required=False)
     
     def clean(self):
         cleaned_data = super(SearchForm, self).clean()
@@ -229,7 +258,7 @@ class SearchForm(forms.Form):
 
         if not search_string and not clasificador:
             # Only do something if both fields are valid so far.
-                raise forms.ValidationError("No se encontraron resultados")
+                raise forms.ValidationError(ugettext_lazy("No se encontraron resultados"))
                 
 def get_base_context(request, login_form=None):
     if request.user.is_authenticated():

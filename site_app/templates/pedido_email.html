@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+</head>
+
+<body>
+    <div>
+
+        {% if impuesto %} <a> *Precios con {{ impuesto }} incluido </a> {% endif %}
+        <table BORDER=4 BORDERCOLOR=RED>
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Codigo</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bien in carrito %}
+                <tr>
+                    <td>
+                        <a href="www.pamperoindustrial.com.ar/catalogo/?bien_id={{ bien.id }}">{{ bien.denominacion }}</a>
+                    </td>
+                    <td>
+                        <span>{{ bien.codigo }}</span>
+                    </td>
+                    <td>
+                        <span>{{ bien.costo }}</span>
+                    </td>
+
+                    <td>
+                        <span>{{ bien.cantidad }}</span>
+                    </td>
+
+                    <!-- <td class="product-quantity">
+                                                    <div class="quantity buttons_added">
+                                                        <input type="button" class="minus" value="-">
+                                                        <input type="number" size="4" class="input-text qty text" title="Qty" value="1" min="0" step="1">
+                                                        <input type="button" class="plus" value="+">
+                                                    </div>
+                                                </td> -->
+
+                    <td>
+                        <span>{{ bien.subtotal }}</span>
+                    </td>
+                </tr>
+                {% endfor %}
+                 <tr>
+                    <td colspan="5" align="right"> Total Pedido: <strong> ${{ pedido.get_precio_total }} </strong> </td>
+                </tr>
+               
+            </tbody>
+        </table>
+
+
+    </div>
+
+</body>
+
+</html>

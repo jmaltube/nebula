@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static from staticfiles %}
+{% load i18n %}
 
 {% block body %} 
     <div class="product-big-title-area">
@@ -7,7 +8,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="product-bit-title text-center">
-                        <h2>Vidriera</h2>
+                        <h2>{% trans "Vidriera" %}</h2>
                     </div>
                 </div>
             </div>
@@ -39,7 +40,7 @@
                                             <input type="number" size="10" class="input-text qty text" title="Cantidad" value="1" name="cantidad" min="1" step="1">
                                         </div>
                                         
-                                            <button class="add_to_cart_button" type="submit">Add to cart</button>
+                                            <button class="add_to_cart_button" type="submit">{% trans "Agregar" %}</button>
                                         
                                     </form>
                                 </div>
@@ -61,7 +62,7 @@
                                         </a>
                                         {% endif %}
                                     </li>
-                                    <li><a href="#"> Página {{ bienes.number }} de {{ bienes.paginator.num_pages }}</a></li>
+                                    <li><a href="#"> {% blocktrans with page=bienes.number pages=bienes.paginator.num_pages %} Página {{ page }} de {{ pages }} {% endblocktrans %} </a></li>
                                     <!--
                                                     <li><a href="#">2</a></li>
                                                     <li><a href="#">3</a></li>

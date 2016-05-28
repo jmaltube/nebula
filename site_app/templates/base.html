@@ -1,4 +1,5 @@
 {% load static from staticfiles %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -33,10 +34,10 @@
                     <div class="col-md-8">
                         <div class="user-menu">
                             <ul>
-                                <li><a {% if request.user.is_authenticated %} href="#" {% endif %}><i class="fa fa-heart"></i>Mis favoritos</a></li>
-                                <li><a {% if request.user.is_authenticated %} href="/pedido" {% endif %} ><i class="fa fa-user"></i>Mi pedido</a></li>
+                                <li><a {% if request.user.is_authenticated %} href="#" {% endif %}><i class="fa fa-heart"></i> {% trans "Favoritos" %}</a></li>
+                                <li><a {% if request.user.is_authenticated %} href="/pedido" {% endif %} ><i class="fa fa-user"></i> {% trans "Mi pedido" %}</a></li>
                             {% if not request.user.is_authenticated %}                               
-                                <li><a class="showlogin" data-toggle="collapse" href="#login-form-wrap"  aria-expanded="false" aria-controls="login-form-wrap"><i class="fa fa-user"></i>Ingreso</a></li>
+                                <li><a class="showlogin" data-toggle="collapse" href="#login-form-wrap"  aria-expanded="false" aria-controls="login-form-wrap"><i class="fa fa-user"></i>{% trans "Ingreso" %}</a></li>
                             </ul>
                                 {% for error in login_form.non_field_errors %}
                                     <p> {{ error }} </p>
@@ -54,18 +55,12 @@
                                         {{ login_form.password }} 
                                     </p>
                                     <div class="clear"></div>
-
                                     <p class="form-row">
-                                        <input type="submit" value="Login" name="login" class="button">
+                                        <input type="submit" value={% trans "Entrar" %} name="login" class="button">
                                     </p>
-                                    <p class="lost_password">
-                                        <a href="#">Perdió su contraseña?</a>
-                                    </p>
-
-                                    <div class="clear"></div>
                                 </form>
                             {% else %}
-                                <li><a href="/logout/"><i class="fa fa-user"></i>{{ request.user }} (logout)</a></li>
+                                <li><a href="/logout/"><i class="fa fa-user"></i>{{ request.user }} {%trans "(cerrar sesión)" %}</a></li>
                             </ul>
                             {% endif %}
                         </div>
@@ -74,15 +69,16 @@
                     <div class="col-md-4">
                         <div class="header-right">
                             <ul class="list-unstyled list-inline">
-                                <a> Moneda {{ request.user.cliente.lista.moneda }}</a> 
-
-                                <li class="dropdown dropdown-small">
-                                    <a data-toggle="dropdown" data-hover="dropdown" class="dropdown-toggle" href="#"><span class="key">language : </span><span class="value">English </span><b class="caret"></b></a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="#">English</a></li>
-                                        <li><a href="#">French</a></li>
-                                        <li><a href="#">German</a></li>
-                                    </ul>
+                                <li> <a> {% trans "Moneda" %} {{ request.user.cliente.lista.moneda }}</a> </li>
+                                <li> 
+                                <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
+                                    <input name="next" type="hidden" value="{{ redirect_to }}" />
+                                    <select name="language"  onchange="this.form.submit();">
+                                        {% get_current_language as LANGUAGE_CODE %}
+                                            <option value="es"{% if 'es' == LANGUAGE_CODE %} selected="selected"{% endif %}>Español (es)</option>
+                                            <option value="en"{% if 'en' == LANGUAGE_CODE %} selected="selected"{% endif %}>English (en)</option>
+                                    </select>
+                                </form>
                                 </li>
                             </ul>
                         </div>
@@ -96,13 +92,13 @@
                 <div class="row">
                     <div class="col-sm-6">
                         <div class="logo">
-                            <h1><a href="index.html">Pampero<span>Industrial</span></a></h1>
+                            <h1><a href="/">Pampero<span>Industrial</span></a></h1>
                         </div>
                     </div>
                     {% if request.user.is_authenticated %}                               
                     <div class="col-sm-6">
                         <div class="shopping-item">
-                            <a href="/pedido">Cart - <span class="cart-amunt">${{ pedido.get_precio_total }}</span> <i class="fa fa-shopping-cart"></i> <span class="product-count">{{ pedido.get_cantidad_total }}</span></a>
+                            <a href="/pedido">{% trans "Carro" %} - <span class="cart-amunt">${{ pedido.get_precio_total }}</span> <i class="fa fa-shopping-cart"></i> <span class="product-count">{{ pedido.get_cantidad_total }}</span></a>
                         </div>
                     </div>
                     {% endif %}
@@ -123,15 +119,11 @@
                     </div> 
                     <div class="navbar-collapse collapse">
                         <ul class="nav navbar-nav">
-                            
-                            <li {% if active == 'index' %}class="active" {% endif %}><a href="/">Home</a></li>
-                            <li {% if active == 'vidriera' %}class="active" {% endif %}><a href="/vidriera/">Vidriera</a></li>
-                            <li {% if active == 'catalogo' %}class="active" {% endif %}><a href="/catalogo/">Catálogo</a></li>
-                            <li {% if active == 'pedido' %}class="active" {% endif %}><a {% if request.user.is_authenticated %} href="/pedido/" {% endif %}> Mi pedido</a></li>
-                            <li {% if active == 'checkout' %}class="active" {% endif %}><a {% if request.user.is_authenticated %} href="/checkout/" {% endif %}>Checkout</a></li>
-                            <li><a href="#">Category</a></li>
-                            <li><a href="#">Others</a></li>
-                            <li><a href="#">Contact</a></li>
+                            <li {% if active == 'index' %}class="active" {% endif %}><a href="/">{% trans "Inicio" %}</a></li>
+                            <li {% if active == 'vidriera' %}class="active" {% endif %}><a href="/vidriera/">{% trans "Vidriera" %}</a></li>
+                            <li {% if active == 'catalogo' %}class="active" {% endif %}><a href="/catalogo/">{% trans "Catálogo" %}</a></li>
+                            <li {% if active == 'pedido' %}class="active" {% endif %}><a {% if request.user.is_authenticated %} href="/pedido/" {% endif %}>{% trans "Mi pedido" %}</a></li>
+                            <li {% if active == 'contacto' %}class="active" {% endif %}><a href="/contacto">{% trans "Contacto" %}</a></li>
                         </ul>
                     </div>  
                 </div>

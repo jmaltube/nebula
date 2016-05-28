@@ -1,0 +1,163 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-05-27 22:51-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: .\templates\admin\base_site.html:12 .\templates\base.html.py:122
+msgid "Inicio"
+msgstr "Home"
+
+#: .\templates\base.html:37
+msgid "Favoritos"
+msgstr "Favorites"
+
+#: .\templates\base.html:38 .\templates\base.html.py:125
+#: .\templates\pedido.html:11
+msgid "Mi pedido"
+msgstr "My order"
+
+#: .\templates\base.html:40
+msgid "Ingreso"
+msgstr "Login"
+
+#: .\templates\base.html:59
+msgid "Entrar"
+msgstr "Login"
+
+#: .\templates\base.html:63
+msgid "(cerrar sesión)"
+msgstr "(log-off)"
+
+#: .\templates\base.html:72
+msgid "Moneda"
+msgstr "Currency"
+
+#: .\templates\base.html:101
+msgid "Carro"
+msgstr "Cart"
+
+#: .\templates\base.html:123 .\templates\vidriera.html.py:11
+msgid "Vidriera"
+msgstr "Showcase"
+
+#: .\templates\base.html:124
+msgid "Catálogo"
+msgstr "Catalog"
+
+#: .\templates\base.html:126
+msgid "Contacto"
+msgstr "Contact"
+
+#: .\templates\catalogo.html:31
+msgid "Buscar productos"
+msgstr "Search products"
+
+#: .\templates\catalogo.html:49
+msgid "Buscar"
+msgstr "Search"
+
+#: .\templates\catalogo.html:54
+msgid "Resultados"
+msgstr "Results"
+
+#: .\templates\catalogo.html:70
+msgid "Clasificador"
+msgstr "Clasifiers"
+
+#: .\templates\catalogo.html:95 .\templates\pedido.html.py:26
+#, python-format
+msgid " *Precio con %(impuesto)s incluido "
+msgstr "*Prices with %(impuesto)s included "
+
+#: .\templates\catalogo.html:104 .\templates\vidriera.html.py:43
+msgid "Agregar"
+msgstr "Add"
+
+#: .\templates\catalogo.html:108
+msgid "Código"
+msgstr "Code"
+
+#: .\templates\catalogo.html:108
+msgid "Etiquetas"
+msgstr "Tags"
+
+#: .\templates\pedido.html:32
+msgid "Producto"
+msgstr "Product"
+
+#: .\templates\pedido.html:33
+msgid "Codigo"
+msgstr "Code"
+
+#: .\templates\pedido.html:34
+msgid "Precio"
+msgstr "Price"
+
+#: .\templates\pedido.html:35
+msgid "Cantidad"
+msgstr "Quantity"
+
+#: .\templates\pedido.html:36 .\templates\pedido.html.py:96
+msgid "Total"
+msgstr "Total"
+
+#: .\templates\pedido.html:79
+#, fuzzy
+#| msgid "Mi pedido"
+msgid "Confirmar pedido"
+msgstr "Confirm order"
+
+#: .\templates\pedido.html:87
+msgid "Totales"
+msgstr "Totals"
+
+#: .\templates\pedido.html:92
+msgid "Subtotal"
+msgstr "Subtotal"
+
+#: .\templates\vidriera.html:65
+#, python-format
+msgid " Página %(page)s de %(pages)s "
+msgstr "Page %(page)s of %(pages)s"
+
+#: .\views.py:83 .\views.py:261
+msgid "No se encontraron resultados"
+msgstr "No results found"
+
+#: .\views.py:129
+msgid "Usuario y/o contraseña incorrectos"
+msgstr "User and/or password are incorrect"
+
+#: .\views.py:183
+msgid "Nuevo pedido de: "
+msgstr "New order from: "
+
+#: .\views.py:239
+msgid "usuario"
+msgstr "user"
+
+#: .\views.py:240
+msgid "contraseña"
+msgstr "password"
+
+#: .\views.py:251
+msgid "Por nombre o descripción"
+msgstr "By name or description"
+
+#: .\views.py:252
+msgid "Seleccione"
+msgstr "Select"

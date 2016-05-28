@@ -253,9 +253,10 @@ class ClienteAdmin(admin.ModelAdmin):
         css = { "all" : ("css/hide_admin_original.css",) }
               
 class PedidoAdmin(admin.ModelAdmin):   
+       
     inlines = (PedidoYBienInLine,)
-    list_display = ('cliente','fecha_actualizacion', 'status', 'checked_out')
-    list_filter = ('cliente', 'status')
+    list_display = ('cliente','fecha_actualizacion','cerrado', 'entregado')
+    list_filter = ('cliente', 'cerrado', 'entregado')
     ordering = ('cliente', 'fecha_actualizacion')
     search_fields = ('cliente',)    
     
@@ -275,7 +276,7 @@ class CompraAdmin(admin.ModelAdmin):
     readonly_fields = ('get_ultima_fecha_modif',)
     list_display = ('proveedor', 'bien','get_bien_clasificador', 'get_ultima_fecha_modif', 'base_costeo','costo', 'moneda', 'dto1', 'dto2', 'dto3')
     list_filter = ('proveedor__razon_social','bien__clasificador')
-    search_fields = ('proveedor__razon_social','bien__clasificador__denominacion', 'ultima_fecha')
+    search_fields = ('proveedor__razon_social','bien__clasificador__denominacion','bien__denominacion','ultima_fecha')
     ordering = ('proveedor', 'bien')
     list_editable = ('costo','dto1', 'dto2', 'dto3')
     modificar_costo_proveedor_action.short_description = "Modificar costo."

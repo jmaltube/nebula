@@ -18,7 +18,7 @@ Passing named parameters
 """
 from django.conf.urls import url, include
 from django.contrib import admin
-from site_app.views import index, vidriera, catalogo, pedido, login, logout, add_to_cart, remove_from_cart
+from site_app.views import index, vidriera, catalogo, pedido, login, logout, add_to_cart, remove_from_cart, checkout
 from bienes_app.views import (BienAutocomplete, ClasificadorAutocomplete, ProveedorAutocomplete,CorredorAutocomplete, duplicar_lista_view, 
                               modificar_costo_view, imprimir_lista, imprimir_lista_pdf)
 from django.conf import settings
@@ -34,6 +34,7 @@ urlpatterns = [
     url(r'^logout/$', logout, name='logout'),
     url(r'^add_to_cart/$', add_to_cart, name='add_to_cart'),
     url(r'^remove_from_cart/$', remove_from_cart, name='remove_from_cart'),
+    url(r'^checkout/$', checkout, name='checkout'),    
     url(r'^admin/bienes_app/bien/bien-autocomplete/$',BienAutocomplete.as_view(),name='bien-autocomplete'),
     url(r'^admin/bienes_app/clasificador/clasificador-autocomplete/$',ClasificadorAutocomplete.as_view(),name='clasificador-autocomplete'),    
     url(r'^admin/bienes_app/proveedor/proveedor-autocomplete/$',ProveedorAutocomplete.as_view(),name='proveedor-autocomplete'),    
@@ -42,6 +43,7 @@ urlpatterns = [
     url(r'^admin/bienes_app/modificar-costo/$',modificar_costo_view, name='modificar-costo'),
     url(r'^admin/bienes_app/imprimir-lista/(?P<lista_id>\d+)/$',imprimir_lista, name='imprimir-lista'),
     url(r'^admin/bienes_app/imprimir-lista-pdf/(?P<lista_id>\d+)/$',imprimir_lista_pdf, name='imprimir-lista-pdf'),
+    url(r'^i18n/', include('django.conf.urls.i18n')),
     url(r'^admin/', admin.site.urls),
 ]
 

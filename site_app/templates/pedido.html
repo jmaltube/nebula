@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static from staticfiles %}
+{% load i18n %}
 
 {% block body %} 
     <div class="product-big-title-area">
@@ -7,7 +8,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="product-bit-title text-center">
-                        <h2>Shopping Cart</h2>
+                        <h2>{% trans "Mi pedido" %}</h2>
                     </div>
                 </div>
             </div>
@@ -22,17 +23,17 @@
                 <div class="col-md-8">
                     <div class="product-content-right">
                         <div class="woocommerce">
-                            {% if impuesto %} <a> *Precios con {{ impuesto }} incluido </a> {% endif %}
-                            <form method="post" action="#">
+                            {% if impuesto %} <a> {% blocktrans %} *Precio con {{ impuesto }} incluido {% endblocktrans %}</a> {% endif %}
                                 <table cellspacing="0" class="shop_table cart">
                                     <thead>
                                         <tr>
                                             <th class="product-remove">&nbsp;</th>
                                             <th class="product-thumbnail">&nbsp;</th>
-                                            <th class="product-name">Producto</th>
-                                            <th class="product-price">Precio</th>
-                                            <th class="product-quantity">Cantidad</th>
-                                            <th class="product-subtotal">Total</th>
+                                            <th class="product-name">{% trans "Producto" %}</th>
+                                            <th class="product-name">{% trans "Codigo" %}</th>
+                                            <th class="product-price">{% trans "Precio" %}</th>
+                                            <th class="product-quantity">{% trans "Cantidad" %}</th>
+                                            <th class="product-subtotal">{% trans "Total" %}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -45,11 +46,13 @@
                                                 <td class="product-thumbnail">
                                                     <a href="/catalogo/?bien_id={{ bien.id }}"><img width="145" height="145" alt="{{ bien.denominacion }}" class="shop_thumbnail" src="{{ bien.imagen }}"></a>
                                                 </td>
-
+                                              
                                                 <td class="product-name">
                                                     <a href="/catalogo/?bien_id={{ bien.id }}">{{ bien.denominacion }}</a> 
                                                 </td>
-
+                                                <td class="product-price">
+                                                    <span class="amount">{{ bien.codigo }}</span> 
+                                                </td>
                                                 <td class="product-price">
                                                     <span class="amount">{{ bien.costo }}</span> 
                                                 </td>
@@ -72,38 +75,25 @@
                                             </tr>
                                         {% endfor %}
                                         <tr>
-                                            <td class="actions" colspan="6">
-                                                <div class="coupon">
-                                                    <label for="coupon_code">Coupon:</label>
-                                                    <input type="text" placeholder="Coupon code" value="" id="coupon_code" class="input-text" name="coupon_code">
-                                                    <input type="submit" value="Apply Coupon" name="apply_coupon" class="button">
-                                                </div>
-                                                <input type="submit" value="Update Cart" name="update_cart" class="button">
-                                                <input type="submit" value="Proceed to Checkout" name="proceed" class="checkout-button button alt wc-forward">
+                                            <td class="actions" colspan="7">
+                                                <a class="add_to_cart_button" href="/checkout" style="float: right"> {% trans "Confirmar pedido" %} </a>
                                             </td>
                                         </tr>
                                     </tbody>
                                 </table>
-                            </form>
 
                             <div class="cart-collaterals">
                                 <div class="cart_totals ">
-                                    <h2>Cart Totals</h2>
+                                    <h2>{% trans "Totales" %}</h2>
 
                                     <table cellspacing="0">
                                         <tbody>
                                             <tr class="cart-subtotal">
-                                                <th>Cart Subtotal</th>
+                                                <th>{% trans "Subtotal" %}</th>
                                                 <td><span class="amount">{{ pedido.get_precio_total }}</span></td>
                                             </tr>
-
-                                            <tr class="shipping">
-                                                <th>Shipping and Handling</th>
-                                                <td>Free Shipping</td>
-                                            </tr>
-
                                             <tr class="order-total">
-                                                <th>Order Total</th>
+                                                <th>{% trans "Total" %}</th>
                                                 <td><strong><span class="amount">{{ pedido.get_precio_total }}</span></strong> </td>
                                             </tr>
                                         </tbody>

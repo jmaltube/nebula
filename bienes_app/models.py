@@ -484,23 +484,29 @@ class ClienteYBien(models.Model):
         return self.cliente.razon_social + "||" + self.bien.denominacion
         
 class Pedido(models.Model):
-    Status = [ ('ABR','Abierto'),('CHK', 'Checked-out'),('PRE', 'En preparación'), ('COM', 'Completo'), ('CAN', 'Cancelado')]
+    Status = [ ('ABR','Abierto'),('CHK', 'Confirmado'),('PRE', 'En preparación'), ('COM', 'Completo'), ('CAN', 'Cancelado')]
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
     fecha_actualizacion = models.DateField(auto_now=True)
-    checked_out = models.BooleanField(default=False)
-    completo = models.BooleanField(default=False)
     status = models.CharField(max_length=3, choices=Status, default='ABR')
     bienes = models.ManyToManyField(Bien, through='PedidoYBien')
+    cerrado = models.BooleanField(default=False, blank=True)
+    entregado = models.BooleanField(default=False, blank=True)
     
     def get_precio_total(self):   
         total = 0
-        for pedidoybien in self.pedidoybien_set.all():   
+        for pedidoybien in self.pedidoybien_set.all():
             total += self.cliente.lista.get_bienes(search_bien_id=pedidoybien.bien.id, cliente=self.cliente).costo * pedidoybien.cantidad
         return total
         
     def get_cantidad_total(self):
         return self.bienes.all().count()
         
+    def __str__(self):
+        return str(self.cliente)
+
+    def __unicode__(self):
+        return str(self.cliente)
+            
 class PedidoYBien(models.Model):
     pedido = models.ForeignKey(Pedido)
     bien = models.ForeignKey(Bien)
@@ -508,7 +514,11 @@ class PedidoYBien(models.Model):
     descuento = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     
     def get_precio(self):
-        precio = self.pedido.cliente.lista.get_bienes(include_hidden=False, search_bien_id=self.bien.id, cliente=self.pedido.cliente).costo
+        if self.descuento:
+                dto = 1-(self.descuento/100)
+        else:
+            dto = 1
+        precio = self.pedido.cliente.lista.get_bienes(include_hidden=False, search_bien_id=self.bien.id, cliente=self.pedido.cliente).costo * dto
         return precio or 0
         
 
