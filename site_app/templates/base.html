@@ -34,33 +34,15 @@
                     <div class="col-md-8">
                         <div class="user-menu">
                             <ul>
-                                <li><a {% if request.user.is_authenticated %} href="#" {% endif %}><i class="fa fa-heart"></i> {% trans "Favoritos" %}</a></li>
-                                <li><a {% if request.user.is_authenticated %} href="/pedido" {% endif %} ><i class="fa fa-user"></i> {% trans "Mi pedido" %}</a></li>
+                                <li><a {% if request.user.is_authenticated %} href="#" {% endif %}><span class="glyphicon glyphicon-heart" aria-hidden="true"></span> {% trans "Favoritos" %}</a></li>
+                                <li><a {% if request.user.is_authenticated %} href="/pedido" {% endif %} > <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> {% trans "Mi pedido" %}</a></li>
                             {% if not request.user.is_authenticated %}                               
-                                <li><a class="showlogin" data-toggle="collapse" href="#login-form-wrap"  aria-expanded="false" aria-controls="login-form-wrap"><i class="fa fa-user"></i>{% trans "Ingreso" %}</a></li>
+                                <li><a href="/login/"> <span class="glyphicon glyphicon-user" aria-hidden="true"></span> {% trans "Ingreso" %}</a></li>
                             </ul>
-                                {% for error in login_form.non_field_errors %}
-                                    <p> {{ error }} </p>
-                                {% endfor %}
-                                <form id="login-form-wrap" class="login collapse" action='/login/' method="post">
-                                    {% csrf_token %}
-                                    <p class="form-row form-row-first">
-                                        {{ login_form.username.label_tag }}
-                                        {{ login_form.username.errors }}  
-                                        {{ login_form.username }} 
-                                    </p>
-                                    <p class="form-row form-row-last">
-                                        {{ login_form.password.label_tag }}
-                                        {{ login_form.password.errors }} 
-                                        {{ login_form.password }} 
-                                    </p>
-                                    <div class="clear"></div>
-                                    <p class="form-row">
-                                        <input type="submit" value={% trans "Entrar" %} name="login" class="button">
-                                    </p>
-                                </form>
+                                
+              
                             {% else %}
-                                <li><a href="/logout/"><i class="fa fa-user"></i>{{ request.user }} {%trans "(cerrar sesión)" %}</a></li>
+                                <li><a href="/logout/"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> {{ request.user }} {%trans "(cerrar sesión)" %}</a></li>
                             </ul>
                             {% endif %}
                         </div>
@@ -121,7 +103,6 @@
                         <ul class="nav navbar-nav">
                             <li {% if active == 'index' %}class="active" {% endif %}><a href="/">{% trans "Inicio" %}</a></li>
                             <li {% if active == 'vidriera' %}class="active" {% endif %}><a href="/vidriera/">{% trans "Vidriera" %}</a></li>
-                            <li {% if active == 'catalogo' %}class="active" {% endif %}><a href="/catalogo/">{% trans "Catálogo" %}</a></li>
                             <li {% if active == 'pedido' %}class="active" {% endif %}><a {% if request.user.is_authenticated %} href="/pedido/" {% endif %}>{% trans "Mi pedido" %}</a></li>
                             <li {% if active == 'contacto' %}class="active" {% endif %}><a href="/contacto">{% trans "Contacto" %}</a></li>
                         </ul>
@@ -152,13 +133,12 @@
                     
                     <div class="col-md-3 col-sm-6">
                         <div class="footer-menu">
-                            <h2 class="footer-wid-title">User Navigation </h2>
+                            <h2 class="footer-wid-title">{%trans "Navegación" %} </h2>
                             <ul>
-                                <li><a href="#">My account</a></li>
-                                <li><a href="#">Order history</a></li>
-                                <li><a href="#">Wishlist</a></li>
-                                <li><a href="#">Vendor contact</a></li>
-                                <li><a href="#">Front page</a></li>
+                                <li><a href="/">{% trans "Inicio" %}</a></li>
+                                <li><a href="/vidriera/">{% trans "Vidriera" %}</a></li>
+                                <li><a {% if request.user.is_authenticated %} href="/pedido/" {% endif %}>{% trans "Mi pedido" %}</a></li>
+                                <li><a href="/contacto">{% trans "Contacto" %}</a></li>
                             </ul>                        
                         </div>
                     </div>
@@ -178,8 +158,8 @@
                     
                     <div class="col-md-3 col-sm-6">
                         <div class="footer-newsletter">
-                            <h2 class="footer-wid-title">Newsletter</h2>
-                            <p>Sign up to our newsletter and get exclusive deals you wont find anywhere else straight to your inbox!</p>
+                            <h2 class="footer-wid-title">{% trans "Novedades!" %}</h2>
+                            <p>{% trans "Subscríbase al boletín para recibir las novedades de nuestros productos en su correo electrónico." %}</p>
                             <div class="newsletter-form">
                                 <form action="#">
                                     <input type="email" placeholder="Type your email">
@@ -197,7 +177,7 @@
                 <div class="row">
                     <div class="col-md-8">
                         <div class="copyright">
-                            <p>&copy; 2015 eElectronics. All Rights Reserved. Coded with <i class="fa fa-heart"></i> by <a href="http://wpexpand.com" target="_blank">WP Expand</a></p>
+                            <p>&copy; 2016 Pampero Industrial.  {% trans "Todos los derechos reservados" %}.</p>
                         </div>
                     </div>
                     

@@ -21,27 +21,56 @@ def index(request):
     return render(request, 'index.html',context)
     
 def vidriera(request):
+    context = get_base_context(request=request) 
     lista = get_lista(request)
     cliente = None
+    bienes = None
+
+    try:
+        search_string = request.session['search_string']                
+        clasificador = Clasificador.objects.get(id=request.session['search_clasificador'])
+    except KeyError:
+        clasificador = 0
+        search_string = ""
+    except ObjectDoesNotExist:
+        clasificador = 0
+        
     if request.user.is_authenticated():
         cliente = request.user.cliente
+    
+    search_form = SearchForm(initial={'search_string': search_string, 'clasificador': clasificador})
+
+    if request.method == 'POST':
+        search_form = SearchForm(request.POST)
+        if search_form.is_valid():
+            search_string = search_form.cleaned_data.get('search_string').strip()
+            request.session['search_string'] = search_string
+            clasificador = search_form.cleaned_data.get('clasificador')
+            if clasificador:
+                request.session['search_clasificador'] = clasificador.id
+            else:
+                request.session['search_clasificador'] = 0
     try:
         if lista:
-            paginator = Paginator(lista.get_bienes(include_hidden=False, cliente=cliente), 20)
-            page = request.GET.get('page')
-            if not page:
-                page = 1
-            bienes = paginator.page(page)
+            results = lista.get_bienes(include_hidden=False, search_string=search_string, clasificador=clasificador, cliente=cliente)
+            if results:            
+                paginator = Paginator(results, 20)
+                page = request.GET.get('page')
+                if not page:
+                    page = 1
+                bienes = paginator.page(page)
+            else:
+                search_form.add_error(None, _("No se encontraron resultados"))                
         else:
+            search_form.add_error(None, _("Sin lista de precios asociada"))
             bienes = None
+        context['search_form'] = search_form
     except PageNotAnInteger:
         bienes = paginator.page(1)
     except EmptyPage:
         bienes = paginator.page(paginator.num_pages)
     
-    context = get_base_context(request=request)
     context['bienes'] = bienes
-    
     return render(request, 'vidriera.html', context)
 
 def catalogo(request):
@@ -52,38 +81,11 @@ def catalogo(request):
     context = get_base_context(request=request)
     signer = Signer()
     signed_id = None
-    search_form = SearchForm()
     
     if request.method == 'GET': 
         signed_id = request.GET.get('bien_id',0)        
     else:
-        if 'search_button' in request.POST:
-            search_form = SearchForm(request.POST)
-            try:
-                del request.session['results']
-            except:
-                pass             
-            if search_form.is_valid():
-                search_string = search_form.cleaned_data.get('search_string').strip()
-                clasificador = search_form.cleaned_data.get('clasificador')
-                bienes = lista.get_bienes(include_hidden=False, search_string=search_string, clasificador=clasificador, cliente=cliente)
-                results = [] 
-                for bien in bienes:
-                    result = {'id': signer.sign(bien.id),
-                            'denominacion': bien.denominacion,
-                            'imagen': bien.imagen1.url,
-                            'costo': "{0:.2f}".format(bien.costo),
-                            'tags': bien.tags,
-                            }
-                    results.append(result)           
-                
-                if results:            
-                    request.session['results'] = results
-                else:
-                    search_form.add_error(None, _("No se encontraron resultados"))
-                context['search_form'] = search_form
-        
-        elif 'add_to_cart_button' in request.POST:
+        if 'add_to_cart_button' in request.POST:
             signed_id = request.POST.get('bien_id',0)
             
             add_to_cart(request)
@@ -97,11 +99,6 @@ def catalogo(request):
             atributos = BienYAtributo.objects.filter(bien__id=bien.id)
             context['atributos'] = atributos
             
-    try:
-        context['search_form'] = search_form
-        context['results'] = request.session['results']
-    except KeyError:
-        pass
     return render(request, 'catalogo.html', context)
 
 
@@ -124,15 +121,19 @@ def login(request):
             user = authenticate(username=username, password=password)
             if user:
                 admin_login(request, user)
-                return HttpResponseRedirect(reverse('index'))
+                return HttpResponseRedirect(reverse('index'))    
             else:                
-                login_form.add_error(None, ValidationError(_('Usuario y/o contraseña incorrectos'), code='invalid'))
-        context = get_base_context(request, login_form)
-        return render(request, 'index.html',context)
+                login_form.add_error(None, ValidationError(_('Usuario y/o contraseña incorrectos'), code='invalid'))    
+    else:
+        login_form = LoginForm()
         
+    context = get_base_context(request=request)    
+    context['login_form'] = login_form
+    return render(request, 'login.html',context)
+            
 def logout(request):
     admin_logout(request)
-    return HttpResponseRedirect(reverse('index'))
+    return HttpResponseRedirect(reverse('index'))    
 
     
 def add_to_cart(request):
@@ -241,35 +242,26 @@ class LoginForm(forms.Form):
     
 class SearchForm(forms.Form):
 
-    #def __init__(self, *args, **kwargs):
-    #    super(SearchForm, self).__init__()
-    #    self.lista = kwargs.pop('lista', None)
-        #if lista:
-        #     self.fields['clasificador'].queryset = lista.clasificadores.all()
-    
     #categoria_formfield = forms.ModelChoiceField(widget=forms.Select(attrs={'size':'13', 'onchange':'this.form.action=this.form.submit()'}), queryset=sitio_categoria.objects.none())
-    search_string = forms.CharField(label=ugettext_lazy('Por nombre o descripción'),max_length=20, required=False)
-    clasificador = forms.ModelChoiceField(empty_label=ugettext_lazy("Seleccione"),queryset=Clasificador.objects.all(), required=False)
+    search_string = forms.CharField(widget=forms.TextInput(attrs={'placeholder': ugettext_lazy('Por nombre o descripción')}), max_length=20, required=False)
+    clasificador = forms.ModelChoiceField(empty_label=ugettext_lazy("Clasificadores:"),queryset=Clasificador.objects.all(), required=False)
     
-    def clean(self):
-        cleaned_data = super(SearchForm, self).clean()
-        search_string = cleaned_data.get("search_string")
-        clasificador = cleaned_data.get("clasificador")
+    #def clean(self):
+    #    cleaned_data = super(SearchForm, self).clean()
+    #    search_string = cleaned_data.get("search_string")
+    #    clasificador = cleaned_data.get("clasificador")
 
-        if not search_string and not clasificador:
+    #    if not search_string and not clasificador:
             # Only do something if both fields are valid so far.
-                raise forms.ValidationError(ugettext_lazy("No se encontraron resultados"))
+    #            raise forms.ValidationError(ugettext_lazy("No se encontraron resultados"))
                 
-def get_base_context(request, login_form=None):
+def get_base_context(request):
     if request.user.is_authenticated():
         pedido = get_pedido(request)
     else:
         pedido = None
-    if not login_form:
-        login_form = LoginForm()
     context = {'pedido':pedido,
                'active':resolve(request.path_info).url_name,
-               'login_form':login_form
                }
     return context
     

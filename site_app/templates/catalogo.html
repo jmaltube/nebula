@@ -26,45 +26,9 @@
         <div class="zigzag-bottom"></div>
         <div class="container">
             <div class="row">
-                <div class="col-md-4">
-                    <div class="single-sidebar">
-                        <h2 class="sidebar-title">{% trans "Buscar productos" %}</h2>
-                       
-                        <form action="." method="post">
-                            {% csrf_token %}
-                            <!--<input type="text" name="search_string" placeholder="buscar productos..." value="{{ search_string }}"> -->
-                            {% for error in search_form.non_field_errors %}
-                                <p> {{ error }} </p>
-                            {% endfor %} 
-                            <p>
-                            {{ search_form.search_string.label_tag }}
-                            {{ search_form.search_string.errors }}  
-                            {{ search_form.search_string }}
-                            </p>
-                            <p>
-                            {{ search_form.clasificador.label_tag }}
-                            {{ search_form.clasificador.errors }}
-                            {{ search_form.clasificador }}                
-                            </p>
-                            <input type="submit" name="search_button" id="search_button" value={% trans "Buscar" %}> 
-                        </form>
-                    </div>
-                    
-                    <div class="single-sidebar-search">
-                        {% if results %} <h2 class="sidebar-title">{% trans "Resultados" %}</h2>{% endif %}
-                        {% for result in results %}                       
-                            <div class="thubmnail-recent">
-                                <img src="{{ result.imagen }}" class="recent-thumb" alt="">
-                                <h2><a href="./?bien_id={{ result.id }}">{{ result.denominacion }}</a></h2>
-                                <div class="product-sidebar-price">
-                                    <ins>${{ result.costo }}</ins> <!-- <del>$800.00</del> -->
-                                </div>                             
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
+              
                 {% if bien %}
-                <div class="col-md-8">
+                <div class="col-md-12">
                     <div class="product-content-right">
                         <div class="product-breadcroumb">
                             <a>{% trans "Clasificador" %}: {{ bien.clasificador }}</a>
@@ -73,16 +37,16 @@
                         <div class="row">
                             <div class="col-sm-6">
                                 <div class="product-images">
-                                    <div class="product-main-img">
+                                    <div class="img-responsive" alt="Responsive image">
                                         <img src="{{ bien.imagen1.url }}" alt="">
                                     </div>
                                     
                                     <div class="product-gallery" id="product-gallery"> 
-                                        {% if bien.imagen1 %} <a href="{{ bien.imagen1.url }}"> <img src="{{ bien.imagen1.url }}" alt=""> </a> {% endif %}
-                                        {% if bien.imagen2 %} <a href="{{ bien.imagen2.url }}"> <img src="{{ bien.imagen2.url }}" alt=""> </a> {% endif %} 
-                                        {% if bien.imagen3 %} <a href="{{ bien.imagen3.url }}"> <img src="{{ bien.imagen3.url }}" alt=""> </a> {% endif %}
-                                        {% if bien.imagen4 %} <a href="{{ bien.imagen4.url }}"> <img src="{{ bien.imagen4.url }}" alt=""> </a> {% endif %}
-                                        {% if bien.imagen5 %} <a href="{{ bien.imagen5.url }}"> <img src="{{ bien.imagen5.url }}" alt=""> </a> {% endif %}
+                                        {% if bien.imagen1 %} <a href="{{ bien.imagen1.url }}"> <img src="{{ bien.imagen1.url }}" class="img-rounded" alt=""> </a> {% endif %}
+                                        {% if bien.imagen2 %} <a href="{{ bien.imagen2.url }}"> <img src="{{ bien.imagen2.url }}" class="img-rounded" alt=""> </a> {% endif %} 
+                                        {% if bien.imagen3 %} <a href="{{ bien.imagen3.url }}"> <img src="{{ bien.imagen3.url }}" class="img-rounded" alt=""> </a> {% endif %}
+                                        {% if bien.imagen4 %} <a href="{{ bien.imagen4.url }}"> <img src="{{ bien.imagen4.url }}" class="img-rounded" alt=""> </a> {% endif %}
+                                        {% if bien.imagen5 %} <a href="{{ bien.imagen5.url }}"> <img src="{{ bien.imagen5.url }}" class="img-rounded" alt=""> </a> {% endif %}
                                     </div>
                                 </div>
                             </div>
