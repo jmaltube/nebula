@@ -11,7 +11,7 @@ from weasyprint import HTML, CSS
 from django.template.loader import get_template
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
-from django.http import Http404
+from django.http import Http404, HttpResponseServerError
 from django.conf import settings
 #from django.forms.models import model_to_dict
 
@@ -214,33 +214,21 @@ def modificar_costo_view(request):
     return render(request, 'modificar_costo.html', {'title':'Modificar costo','form':form,'opts':Bien._meta})    
 
 #@login_required    
-def imprimir_lista(request, lista_id):
+def imprimir_lista(request, lista_id, format='HTML'):
     if not request.user.is_authenticated():
         return HttpResponseRedirect('/admin/')
     try:
         l = Lista.objects.get(id=int(lista_id))
         lista = l.get_bienes()
-        return render(request, 'imprimir_lista.html',{'title':'Imprimir lista','lista':lista, 'opts':Lista._meta})
+        context = {'title':l.nombre,'lista':lista, 'opts':Lista._meta}
+        if format == "HTML":
+            return render(request, 'imprimir_lista.html',context=context)
+        elif format == "PDF":
+            html_template = get_template('imprimir_lista.html')
+            rendered_html = html_template.render(request=request, context=context).encode(encoding="UTF-8")
+            pdf_file = HTML(string=rendered_html).write_pdf(stylesheets=[request.build_absolute_uri(settings.STATIC_URL + 'admin/css/base.css')])
+            http_response = HttpResponse(pdf_file, content_type='application/pdf')
+            http_response['Content-Disposition'] = 'filename="report.pdf"'
+            return http_response
     except:
-        raise Http404
-
-def imprimir_lista_pdf(request, lista_id):
-    if not request.user.is_authenticated():
-        return HttpResponseRedirect('/admin/')
-    try:
-        l = Lista.objects.get(id=int(lista_id))
-        lista = l.get_bienes()
-        
-        #return render(request, 'imprimir_lista_pdf.html',{'lista':lista})
-        
-        html_template = get_template('imprimir_lista_pdf.html')
-        rendered_html = html_template.render(request=request, context={'lista':lista}).encode(encoding="UTF-8")
-        
-        pdf_file = HTML(string=rendered_html).write_pdf(stylesheets=[CSS(settings.STATICFILES_DIRS[0] + '/css/pdf.css')])
-
-        http_response = HttpResponse(pdf_file, content_type='application/pdf')
-        http_response['Content-Disposition'] = 'filename="report.pdf"'
-
-        return http_response
-    except:
-        raise Http404
+        raise HttpResponseServerError

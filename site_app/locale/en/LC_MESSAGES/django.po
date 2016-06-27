@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-05-27 22:51-0300\n"
+"POT-Creation-Date: 2016-06-14 21:49-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,147 +17,177 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: .\templates\admin\base_site.html:12 .\templates\base.html.py:122
+#: .\site_app\templates\admin\base_site.html:12
+#: .\site_app\templates\base.html:104 .\site_app\templates\base.html.py:138
 msgid "Inicio"
 msgstr "Home"
 
-#: .\templates\base.html:37
+#: .\site_app\templates\base.html:37
 msgid "Favoritos"
 msgstr "Favorites"
 
-#: .\templates\base.html:38 .\templates\base.html.py:125
-#: .\templates\pedido.html:11
+#: .\site_app\templates\base.html:38 .\site_app\templates\base.html.py:106
+#: .\site_app\templates\base.html:140 .\site_app\templates\pedido.html:11
 msgid "Mi pedido"
 msgstr "My order"
 
-#: .\templates\base.html:40
+#: .\site_app\templates\base.html:40
 msgid "Ingreso"
 msgstr "Login"
 
-#: .\templates\base.html:59
-msgid "Entrar"
-msgstr "Login"
-
-#: .\templates\base.html:63
+#: .\site_app\templates\base.html:45
 msgid "(cerrar sesión)"
 msgstr "(log-off)"
 
-#: .\templates\base.html:72
+#: .\site_app\templates\base.html:54
 msgid "Moneda"
 msgstr "Currency"
 
-#: .\templates\base.html:101
+#: .\site_app\templates\base.html:83
 msgid "Carro"
 msgstr "Cart"
 
-#: .\templates\base.html:123 .\templates\vidriera.html.py:11
+#: .\site_app\templates\base.html:105 .\site_app\templates\base.html.py:139
+#: .\site_app\templates\vidriera.html:7
 msgid "Vidriera"
 msgstr "Showcase"
 
-#: .\templates\base.html:124
-msgid "Catálogo"
-msgstr "Catalog"
-
-#: .\templates\base.html:126
+#: .\site_app\templates\base.html:107 .\site_app\templates\base.html.py:141
 msgid "Contacto"
 msgstr "Contact"
 
-#: .\templates\catalogo.html:31
-msgid "Buscar productos"
-msgstr "Search products"
+#: .\site_app\templates\base.html:136
+msgid "Navegación"
+msgstr "Navigation"
 
-#: .\templates\catalogo.html:49
-msgid "Buscar"
-msgstr "Search"
+#: .\site_app\templates\base.html:161
+msgid "Novedades!"
+msgstr "Newsletter!"
 
-#: .\templates\catalogo.html:54
-msgid "Resultados"
-msgstr "Results"
+#: .\site_app\templates\base.html:162
+msgid ""
+"Subscríbase al boletín para recibir las novedades de nuestros productos en "
+"su correo electrónico."
+msgstr "Subscribe to our newsletter to stay on top of new products and great deals!"
 
-#: .\templates\catalogo.html:70
+#: .\site_app\templates\base.html:180
+msgid "Todos los derechos reservados"
+msgstr "All rights reserved"
+
+#: .\site_app\templates\catalogo.html:34
 msgid "Clasificador"
 msgstr "Clasifiers"
 
-#: .\templates\catalogo.html:95 .\templates\pedido.html.py:26
+#: .\site_app\templates\catalogo.html:59 .\site_app\templates\pedido.html:26
 #, python-format
 msgid " *Precio con %(impuesto)s incluido "
 msgstr "*Prices with %(impuesto)s included "
 
-#: .\templates\catalogo.html:104 .\templates\vidriera.html.py:43
+#: .\site_app\templates\catalogo.html:68 .\site_app\templates\vidriera.html:63
 msgid "Agregar"
 msgstr "Add"
 
-#: .\templates\catalogo.html:108
+#: .\site_app\templates\catalogo.html:72
 msgid "Código"
 msgstr "Code"
 
-#: .\templates\catalogo.html:108
+#: .\site_app\templates\catalogo.html:72
 msgid "Etiquetas"
 msgstr "Tags"
 
-#: .\templates\pedido.html:32
+#: .\site_app\templates\login.html:10
+msgid "¡Bienvenido!"
+msgstr "Welcome!"
+
+#: .\site_app\templates\login.html:21 .\site_app\views.py:240
+msgid "usuario"
+msgstr "user"
+
+#: .\site_app\templates\login.html:25 .\site_app\views.py:241
+msgid "contraseña"
+msgstr "password"
+
+#: .\site_app\templates\login.html:29
+msgid "Entrar"
+msgstr "Login"
+
+#: .\site_app\templates\pedido.html:32
 msgid "Producto"
 msgstr "Product"
 
-#: .\templates\pedido.html:33
+#: .\site_app\templates\pedido.html:33
 msgid "Codigo"
 msgstr "Code"
 
-#: .\templates\pedido.html:34
+#: .\site_app\templates\pedido.html:34
 msgid "Precio"
 msgstr "Price"
 
-#: .\templates\pedido.html:35
+#: .\site_app\templates\pedido.html:35
 msgid "Cantidad"
 msgstr "Quantity"
 
-#: .\templates\pedido.html:36 .\templates\pedido.html.py:96
+#: .\site_app\templates\pedido.html:36 .\site_app\templates\pedido.html:96
 msgid "Total"
 msgstr "Total"
 
-#: .\templates\pedido.html:79
+#: .\site_app\templates\pedido.html:79
 #, fuzzy
 #| msgid "Mi pedido"
 msgid "Confirmar pedido"
 msgstr "Confirm order"
 
-#: .\templates\pedido.html:87
+#: .\site_app\templates\pedido.html:87
 msgid "Totales"
 msgstr "Totals"
 
-#: .\templates\pedido.html:92
+#: .\site_app\templates\pedido.html:92
 msgid "Subtotal"
 msgstr "Subtotal"
 
-#: .\templates\vidriera.html:65
+#: .\site_app\templates\vidriera.html:36
+msgid "Buscar"
+msgstr "Search"
+
+#: .\site_app\templates\vidriera.html:85
 #, python-format
 msgid " Página %(page)s de %(pages)s "
 msgstr "Page %(page)s of %(pages)s"
 
-#: .\views.py:83 .\views.py:261
+#: .\site_app\views.py:63
 msgid "No se encontraron resultados"
 msgstr "No results found"
 
-#: .\views.py:129
+#: .\site_app\views.py:65
+msgid "Sin lista de precios asociada"
+msgstr "No list of prices found for your user"
+
+#: .\site_app\views.py:126
 msgid "Usuario y/o contraseña incorrectos"
 msgstr "User and/or password are incorrect"
 
-#: .\views.py:183
+#: .\site_app\views.py:184
 msgid "Nuevo pedido de: "
 msgstr "New order from: "
 
-#: .\views.py:239
-msgid "usuario"
-msgstr "user"
-
-#: .\views.py:240
-msgid "contraseña"
-msgstr "password"
-
-#: .\views.py:251
+#: .\site_app\views.py:246
 msgid "Por nombre o descripción"
 msgstr "By name or description"
 
-#: .\views.py:252
-msgid "Seleccione"
-msgstr "Select"
+#: .\site_app\views.py:247
+#, fuzzy
+#| msgid "Clasificador"
+msgid "Clasificadores:"
+msgstr "Clasifiers"
+
+#~ msgid "Catálogo"
+#~ msgstr "Catalog"
+
+#~ msgid "Buscar productos"
+#~ msgstr "Search products"
+
+#~ msgid "Resultados"
+#~ msgstr "Results"
+
+#~ msgid "Seleccione"
+#~ msgstr "Select"

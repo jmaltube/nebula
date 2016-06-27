@@ -10,8 +10,8 @@ class Moneda(models.Model):
     visible = models.BooleanField(default=True)
     
     def __str__(self):
-        return u"%s: %s" %(self.moneda, self.cotizacion)
+        return u"%s (%s)" %(self.moneda, self.cotizacion)
     
     def __unicode__(self):
-        return u"%s: %s" %(self.moneda, self.cotizacion)
+        return u"%s (%s)" %(self.moneda, self.cotizacion)
     

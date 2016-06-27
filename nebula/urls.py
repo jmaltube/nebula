@@ -20,7 +20,7 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from site_app.views import index, vidriera, catalogo, pedido, login, logout, add_to_cart, remove_from_cart, checkout
 from bienes_app.views import (BienAutocomplete, ClasificadorAutocomplete, ProveedorAutocomplete,CorredorAutocomplete, duplicar_lista_view, 
-                              modificar_costo_view, imprimir_lista, imprimir_lista_pdf)
+                              modificar_costo_view, imprimir_lista)
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
@@ -41,8 +41,7 @@ urlpatterns = [
     url(r'^admin/bienes_app/cliente/corredor-autocomplete/$',CorredorAutocomplete.as_view(),name='corredor-autocomplete'),
     url(r'^admin/bienes_app/duplicar-lista/$',duplicar_lista_view, name='duplicar-lista'),
     url(r'^admin/bienes_app/modificar-costo/$',modificar_costo_view, name='modificar-costo'),
-    url(r'^admin/bienes_app/imprimir-lista/(?P<lista_id>\d+)/$',imprimir_lista, name='imprimir-lista'),
-    url(r'^admin/bienes_app/imprimir-lista-pdf/(?P<lista_id>\d+)/$',imprimir_lista_pdf, name='imprimir-lista-pdf'),
+    url(r'^admin/bienes_app/imprimir-lista/(?P<format>\w+)/(?P<lista_id>\d+)/$',imprimir_lista, name='imprimir-lista'),
     url(r'^i18n/', include('django.conf.urls.i18n')),
     url(r'^admin/', admin.site.urls),
 ]

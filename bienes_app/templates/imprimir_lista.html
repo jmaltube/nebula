@@ -7,7 +7,7 @@
         <h3>{{ bienes.grouper }}</h3>
         <ul>
         {% for bien in bienes.list|dictsort:"denominacion" %}
-            <li>{{ bien.denominacion }}: {{ bien.costo }} {{ bien.moneda }}</li>
+            <li> <strong>{{ bien.denominacion }}: </strong> {{ bien.costo }} {{ bien.moneda }}</li>
         {% endfor %}
         </ul>
     {% endfor %}

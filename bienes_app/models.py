@@ -342,14 +342,12 @@ class Lista(models.Model):
         for l in lista_clasificador:
             if not (not include_hidden and not l.visible):
                 for b in l.clasificador.bien_set.filter(Q(denominacion__icontains=search_string) | Q(clasificador__denominacion__icontains=search_string)):                      
-                    seen = False
                     for z in lista_bien:                
                         if z.bien == b and z.margen > 0:                    
                             b.costo = self.calcular_costo(costo=b.costo, margen=z.margen, moneda=z.bien.moneda())                            
                             z.margen = -1
-                            seen = True
-                            break                
-                    if not seen:                                       
+                            break
+                    else: #FOR-ELSE, not IF-ELSE!
                         b.costo = self.calcular_costo(costo=b.costo, margen=l.margen, moneda=b.moneda())
                     
                     if b.id == search_bien_id:

@@ -23,61 +23,51 @@ def index(request):
 def vidriera(request):
     context = get_base_context(request=request) 
     lista = get_lista(request)
-    cliente = None
+    cliente = request.user.cliente if request.user.is_authenticated() else None
     bienes = None
 
     try:
         search_string = request.session['search_string']                
         clasificador = Clasificador.objects.get(id=request.session['search_clasificador'])
-    except KeyError:
-        clasificador = 0
+    except:
+        clasificador = Clasificador.objects.none()
         search_string = ""
-    except ObjectDoesNotExist:
-        clasificador = 0
-        
-    if request.user.is_authenticated():
-        cliente = request.user.cliente
     
-    search_form = SearchForm(initial={'search_string': search_string, 'clasificador': clasificador})
-
     if request.method == 'POST':
         search_form = SearchForm(request.POST)
         if search_form.is_valid():
             search_string = search_form.cleaned_data.get('search_string').strip()
             request.session['search_string'] = search_string
             clasificador = search_form.cleaned_data.get('clasificador')
-            if clasificador:
-                request.session['search_clasificador'] = clasificador.id
-            else:
-                request.session['search_clasificador'] = 0
+            request.session['search_clasificador'] = clasificador.id if clasificador else 0
+    else:
+        search_form = SearchForm({'search_string': search_string, 'clasificador': clasificador})
+        search_form.is_valid()
+        
     try:
         if lista:
             results = lista.get_bienes(include_hidden=False, search_string=search_string, clasificador=clasificador, cliente=cliente)
             if results:            
                 paginator = Paginator(results, 20)
-                page = request.GET.get('page')
-                if not page:
-                    page = 1
+                page = request.GET.get('page') or 1
                 bienes = paginator.page(page)
             else:
-                search_form.add_error(None, _("No se encontraron resultados"))                
+                search_form.add_error(None, _("No se encontraron resultados"))
+                #form.errors['__all__'] = form.error_class(["error msg"])
         else:
             search_form.add_error(None, _("Sin lista de precios asociada"))
-            bienes = None
-        context['search_form'] = search_form
     except PageNotAnInteger:
         bienes = paginator.page(1)
     except EmptyPage:
         bienes = paginator.page(paginator.num_pages)
-    
+
+    context['search_form'] = search_form
     context['bienes'] = bienes
     return render(request, 'vidriera.html', context)
 
 def catalogo(request):
     lista = get_lista(request)
-    cliente = None
-    if request.user.is_authenticated():
-        cliente = request.user.cliente
+    cliente = request.user.cliente if request.user.is_authenticated() else None
     context = get_base_context(request=request)
     signer = Signer()
     signed_id = None
@@ -87,7 +77,6 @@ def catalogo(request):
     else:
         if 'add_to_cart_button' in request.POST:
             signed_id = request.POST.get('bien_id',0)
-            
             add_to_cart(request)
 
     if signed_id:
@@ -98,9 +87,7 @@ def catalogo(request):
             context['impuesto'] = lista.impuesto
             atributos = BienYAtributo.objects.filter(bien__id=bien.id)
             context['atributos'] = atributos
-            
     return render(request, 'catalogo.html', context)
-
 
 def pedido(request):
     if request.user.is_authenticated():
@@ -121,7 +108,7 @@ def login(request):
             user = authenticate(username=username, password=password)
             if user:
                 admin_login(request, user)
-                return HttpResponseRedirect(reverse('index'))    
+                return HttpResponseRedirect(reverse('vidriera'))    
             else:                
                 login_form.add_error(None, ValidationError(_('Usuario y/o contraseña incorrectos'), code='invalid'))    
     else:
@@ -152,8 +139,10 @@ def add_to_cart(request):
         except PedidoYBien.DoesNotExist:
             carrito = PedidoYBien(pedido=pedido, bien=bien, cantidad=cantidad)    
         carrito.save()
-    return HttpResponseRedirect(next_url)
-    
+        return HttpResponseRedirect(next_url)
+    else:
+        return HttpResponseRedirect(reverse('index'))    
+        
 def remove_from_cart(request):
     if request.user.is_authenticated():
         next_url = request.GET.get('next_url')
@@ -172,7 +161,9 @@ def remove_from_cart(request):
                 pass    
             except PedidoYBien.DoesNotExist:
                 pass
-    return HttpResponseRedirect(next_url)    
+        return HttpResponseRedirect(next_url)    
+    else:
+        return HttpResponseRedirect(reverse('index'))  
 
 def checkout(request):
     if request.user.is_authenticated():
@@ -195,9 +186,11 @@ def checkout(request):
         except Exception as e:
             pass
     
-    #print(send_mail(subject="subject", message="message",from_email='juan.altube@nebula.com.ar', recipient_list=('juan.altube@nebula.com.ar',), fail_silently=False, auth_user=None, auth_password=None, connection=None, html_message=None))
-    return HttpResponseRedirect(reverse('pedido'))    
-    
+        #print(send_mail(subject="subject", message="message",from_email='juan.altube@nebula.com.ar', recipient_list=('juan.altube@nebula.com.ar',), fail_silently=False, auth_user=None, auth_password=None, connection=None, html_message=None))
+        return HttpResponseRedirect(reverse('pedido'))    
+    else:
+        return HttpResponseRedirect(reverse('index'))  
+        
 #////////////////////# PRIVATE #////////////////////#
 
 def get_lista(request):
@@ -256,10 +249,7 @@ class SearchForm(forms.Form):
     #            raise forms.ValidationError(ugettext_lazy("No se encontraron resultados"))
                 
 def get_base_context(request):
-    if request.user.is_authenticated():
-        pedido = get_pedido(request)
-    else:
-        pedido = None
+    pedido = get_pedido(request) if request.user.is_authenticated() else None
     context = {'pedido':pedido,
                'active':resolve(request.path_info).url_name,
                }
