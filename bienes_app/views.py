@@ -163,10 +163,9 @@ class DuplicarListaForm(forms.Form):
     margen = forms.DecimalField(label="Modificar margen (%)",max_digits=10, decimal_places=2,required=True, initial=0)
     ids = forms.CharField(widget = forms.HiddenInput())#, required = False)
     margen.help_text = "Deje el margen igual a cero para mantener el margen de la lista."
-        
+
+@login_required(login_url='/admin/login/')
 def duplicar_lista_view(request):
-    if not request.user.is_authenticated():
-        return HttpResponseRedirect('/admin/')
     if request.method == 'POST':
         form = DuplicarListaForm(request.POST)
         if form.is_valid():
@@ -188,10 +187,9 @@ class ModificarCostoForm(forms.Form):
     valor = forms.DecimalField(label="valor",help_text="0-100 para (%) <br> 0-99999999.99 para valores fijos",max_digits=10, decimal_places=2,required=True, initial=10)
     ids = forms.CharField(widget = forms.HiddenInput())#, required = False)
     modelo = forms.CharField(widget = forms.HiddenInput())
-        
+
+@login_required(login_url='/admin/login/')
 def modificar_costo_view(request):
-    if not request.user.is_authenticated():
-        return HttpResponseRedirect('/admin/')
     if request.method == 'POST':
         form = ModificarCostoForm(request.POST)
         if form.is_valid():
@@ -215,10 +213,8 @@ def modificar_costo_view(request):
         
     return render(request, 'modificar_costo.html', {'title':'Modificar costo','form':form,'opts':Bien._meta})    
 
-#@login_required    
+@login_required(login_url='/admin/login/')
 def imprimir_lista(request, lista_id, format='HTML'):
-    if not request.user.is_authenticated():
-        return HttpResponseRedirect('/admin/')
     try:
         l = Lista.objects.get(id=int(lista_id))
         lista = l.get_bienes()
@@ -228,7 +224,6 @@ def imprimir_lista(request, lista_id, format='HTML'):
         elif format == "PDF":
             html_template = get_template('imprimir_lista.html')
             rendered_html = html_template.render(request=request, context=context)#.encode(encoding="UTF-8")
-            
             options = {
                 'page-size': 'Letter',
                 'margin-top': '0.25in',
@@ -236,15 +231,15 @@ def imprimir_lista(request, lista_id, format='HTML'):
                 'margin-bottom': '0.25in',
                 'margin-left': '0.25in',
                 'encoding': "UTF-8",
-                
             } #'no-outline': None
-            pdf_name = settings.STATICFILES_DIRS[0] + "/pdf/lista.pdf"
-            from_string(rendered_html, pdf_name, options=options)
+            css = '{0}/css/base.css'.format(settings.STATICFILES_DIRS[0])
+            pdf_name = "{0}/pdf/lista.pdf".format(settings.STATICFILES_DIRS[0])
+            from_string(rendered_html, pdf_name, options=options, css=css)
             pdf = open(pdf_name,mode='rb')#,encoding = "ISO-8859-1")
             response = HttpResponse(pdf.read(), content_type='application/pdf')  # Generates the response as pdf response.
-            response['Content-Disposition'] = 'attachment; filename='+l.nombre+'.pdf'
+            response['Content-Disposition'] = 'attachment; filename={0}.pdf'.format(l.nombre)
             pdf.close()
             remove(pdf_name)  # remove the locally created pdf file.
             return response
-    except:
-        raise HttpResponseServerError
+    except Exception as e:
+        return HttpResponseServerError(e)

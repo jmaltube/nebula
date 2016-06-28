@@ -175,7 +175,7 @@ class ListaAdmin(admin.ModelAdmin):
         url_web = reverse('imprimir-lista', kwargs={'format':"HTML", 'lista_id':obj.id})
         url_pdf = reverse('imprimir-lista', kwargs={'format':"PDF", 'lista_id':obj.id})
         
-        return format_html("<a href='"+url_web+"'>VER</a> <a href='"+url_pdf+"'>PDF</a>")
+        return format_html("<a href='{0}'>HTML</a> - <a href='{1}'>PDF</a>".format(url_web, url_pdf))
 
     imprimir.short_description = 'Impresión'
     imprimir.allow_tags = True
