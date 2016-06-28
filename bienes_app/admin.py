@@ -172,8 +172,10 @@ class ListaAdmin(admin.ModelAdmin):
         css = { "all" : ("css/hide_admin_original.css",) }
 
     def imprimir(self, obj):
-        url = reverse('imprimir-lista', kwargs={'format':"HTML", 'lista_id':obj.id})
-        return format_html("<a href='"+url+"'>Imprimir</a>")
+        url_web = reverse('imprimir-lista', kwargs={'format':"HTML", 'lista_id':obj.id})
+        url_pdf = reverse('imprimir-lista', kwargs={'format':"PDF", 'lista_id':obj.id})
+        
+        return format_html("<a href='"+url_web+"'>VER</a> <a href='"+url_pdf+"'>PDF</a>")
 
     imprimir.short_description = 'Impresión'
     imprimir.allow_tags = True

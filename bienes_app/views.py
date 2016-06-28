@@ -7,13 +7,15 @@ from copy import deepcopy
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db import transaction, IntegrityError
 from django import forms
-from weasyprint import HTML, CSS
 from django.template.loader import get_template
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponseServerError
 from django.conf import settings
 #from django.forms.models import model_to_dict
+from pdfkit import from_string
+from os import remove 
+
 
 #--------------------PRIVATE--------------------#                         
 
@@ -225,10 +227,24 @@ def imprimir_lista(request, lista_id, format='HTML'):
             return render(request, 'imprimir_lista.html',context=context)
         elif format == "PDF":
             html_template = get_template('imprimir_lista.html')
-            rendered_html = html_template.render(request=request, context=context).encode(encoding="UTF-8")
-            pdf_file = HTML(string=rendered_html).write_pdf(stylesheets=[request.build_absolute_uri(settings.STATIC_URL + 'admin/css/base.css')])
-            http_response = HttpResponse(pdf_file, content_type='application/pdf')
-            http_response['Content-Disposition'] = 'filename="report.pdf"'
-            return http_response
+            rendered_html = html_template.render(request=request, context=context)#.encode(encoding="UTF-8")
+            
+            options = {
+                'page-size': 'Letter',
+                'margin-top': '0.25in',
+                'margin-right': '0.25in',
+                'margin-bottom': '0.25in',
+                'margin-left': '0.25in',
+                'encoding': "UTF-8",
+                
+            } #'no-outline': None
+            pdf_name = settings.STATICFILES_DIRS[0] + "/pdf/lista.pdf"
+            from_string(rendered_html, pdf_name, options=options)
+            pdf = open(pdf_name,mode='rb')#,encoding = "ISO-8859-1")
+            response = HttpResponse(pdf.read(), content_type='application/pdf')  # Generates the response as pdf response.
+            response['Content-Disposition'] = 'attachment; filename='+l.nombre+'.pdf'
+            pdf.close()
+            remove(pdf_name)  # remove the locally created pdf file.
+            return response
     except:
         raise HttpResponseServerError
