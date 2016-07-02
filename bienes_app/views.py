@@ -233,7 +233,7 @@ def imprimir_lista(request, lista_id, format='HTML'):
             } #'no-outline': None
             css = '{0}/css/base.css'.format(settings.STATICFILES_DIRS[0])
             pdf_name = "{0}/pdf/lista.pdf".format(settings.STATICFILES_DIRS[0])
-            config = configuration(wkhtmltopdf=settings.PATH_TO_WKHTMLTOPDF)
+            config = configuration(wkhtmltopdf=bytes(settings.PATH_TO_WKHTMLTOPDF, 'utf-8'))
             from_string(rendered_html, pdf_name, options=options, css=css, configuration=config)
             pdf = open(pdf_name,mode='rb')#,encoding = "ISO-8859-1")
             response = HttpResponse(pdf.read(), content_type='application/pdf')  # Generates the response as pdf response.
