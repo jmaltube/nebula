@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.shortcuts import render_to_response, render
+from django.shortcuts import render
 from dal import autocomplete
 from bienes_app.models import Bien, Compra, Lista, ListaYClasificador, ListaYBien, Clasificador, Proveedor
 from django.http import HttpResponse, HttpResponseRedirect
@@ -8,14 +8,13 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db import transaction, IntegrityError
 from django import forms
 from django.template.loader import get_template
-from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
-from django.http import Http404, HttpResponseServerError
+from django.http import HttpResponseServerError
 from django.conf import settings
 #from django.forms.models import model_to_dict
-from pdfkit import from_string
+from pdfkit import from_string, configuration
 from os import remove 
-
+from django.conf import settings
 
 #--------------------PRIVATE--------------------#                         
 
@@ -234,7 +233,8 @@ def imprimir_lista(request, lista_id, format='HTML'):
             } #'no-outline': None
             css = '{0}/css/base.css'.format(settings.STATICFILES_DIRS[0])
             pdf_name = "{0}/pdf/lista.pdf".format(settings.STATICFILES_DIRS[0])
-            from_string(rendered_html, pdf_name, options=options, css=css)
+            config = configuration(wkhtmltopdf=settings.PATH_TO_WKHTMLTOPDF)
+            from_string(rendered_html, pdf_name, options=options, css=css, configuration=config)
             pdf = open(pdf_name,mode='rb')#,encoding = "ISO-8859-1")
             response = HttpResponse(pdf.read(), content_type='application/pdf')  # Generates the response as pdf response.
             response['Content-Disposition'] = 'attachment; filename={0}.pdf'.format(l.nombre)
