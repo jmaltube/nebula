@@ -96,8 +96,6 @@ def pedido(request):
     if request.user.is_authenticated():
         context = get_base_context(request)
         context['pedidos'] = Pedido.objects.filter(cliente=request.user.cliente).exclude(estado__in=('COM', 'CAN')).order_by('id')
-        print(request.user.cliente)
-        print(context['pedidos'])
         context['impuesto'] = get_lista(request).impuesto
         return render(request, 'pedido.html',context)
     else:
@@ -174,8 +172,8 @@ def checkout(request):
         try:
             context = get_base_context(request)
             pedido = context['carrito']
-            #pedido.checkout()
-            #pedido.save()
+            pedido.checkout()
+            pedido.save()
             subject = _("Nuevo pedido de: {0} ".format(str(pedido.cliente)))
             lista = get_lista(request)
             context['domain'] = settings.COMPANY_DOMAIN_NAME 
