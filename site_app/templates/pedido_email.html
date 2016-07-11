@@ -20,20 +20,20 @@
                 </tr>
             </thead>
             <tbody>
-                {% for bien in carrito %}
+                {% for item in carrito.pedidoybien_set.all %}
                 <tr>
                     <td>
-                        <a href="www.pamperoindustrial.com.ar/catalogo/?bien_id={{ bien.id }}">{{ bien.denominacion }}</a>
+                        <a href="{{ domain }}/catalogo/?bien_id={{ bien.id }}">{{ item.bien.denominacion }}</a>
                     </td>
                     <td>
-                        <span>{{ bien.codigo }}</span>
+                        <span>{{ item.bien.codigo }}</span>
                     </td>
                     <td>
-                        <span>{{ bien.costo }}</span>
+                        <span>{{ item.get_precio }}</span>
                     </td>
 
                     <td>
-                        <span>{{ bien.cantidad }}</span>
+                        <span>{{ item.cantidad }}</span>
                     </td>
 
                     <!-- <td class="product-quantity">
@@ -45,12 +45,12 @@
                                                 </td> -->
 
                     <td>
-                        <span>{{ bien.subtotal }}</span>
+                        <span>{{ item.subtotal }}</span>
                     </td>
                 </tr>
                 {% endfor %}
                  <tr>
-                    <td colspan="5" align="right"> Total Pedido: <strong> ${{ pedido.get_precio_total }} </strong> </td>
+                    <td colspan="5" align="right"> Total Pedido: <strong> ${{ carrito.get_precio_total }} </strong> </td>
                 </tr>
                
             </tbody>

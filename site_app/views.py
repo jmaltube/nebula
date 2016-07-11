@@ -95,7 +95,9 @@ def catalogo(request):
 def pedido(request):
     if request.user.is_authenticated():
         context = get_base_context(request)
-        context['pedidos'] = Pedido.objects.exclude(cliente=request.user.cliente, estado__in=('COM', 'CAN')).order_by('id')
+        context['pedidos'] = Pedido.objects.filter(cliente=request.user.cliente).exclude(estado__in=('COM', 'CAN')).order_by('id')
+        print(request.user.cliente)
+        print(context['pedidos'])
         context['impuesto'] = get_lista(request).impuesto
         return render(request, 'pedido.html',context)
     else:
@@ -172,19 +174,15 @@ def checkout(request):
         try:
             context = get_base_context(request)
             pedido = context['carrito']
-            pedido.checkout()
-            pedido.save()
-            subject = _("Nuevo pedido de: ") + str(pedido.cliente)
-            
+            #pedido.checkout()
+            #pedido.save()
+            subject = _("Nuevo pedido de: {0} ".format(str(pedido.cliente)))
             lista = get_lista(request)
-            
-            context['carrito'] = get_pedido_detalle(pedido=pedido) 
+            context['domain'] = settings.COMPANY_DOMAIN_NAME 
             context['impuesto'] = lista.impuesto
-            
             template = loader.get_template('pedido_email.html')
-            
             message = template.render(context)  
-            mail_admins(subject=subject , message="yeah",fail_silently=False, connection=None, html_message=message)        
+            mail_admins(subject=subject , message="automated email",fail_silently=False, connection=None, html_message=message)        
         except Exception as e:
             pass
     
