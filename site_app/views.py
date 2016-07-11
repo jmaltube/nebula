@@ -13,7 +13,7 @@ from django.core.mail import mail_admins, send_mail
 from django.db.models import Q
 from django.utils.translation import ugettext as _
 from django.utils.translation import ugettext_lazy
-
+from django.conf import settings
 
 #////////////////////# PUBLIC #////////////////////# 
 def index(request):    
@@ -23,7 +23,10 @@ def index(request):
 def vidriera(request):
     context = get_base_context(request=request) 
     lista = get_lista(request)
-    cliente = request.user.cliente if request.user.is_authenticated() else None
+    try:
+        cliente = request.user.cliente if request.user.is_authenticated() else None
+    except:
+        cliente = None
     bienes = None
 
     try:
@@ -91,10 +94,9 @@ def catalogo(request):
 
 def pedido(request):
     if request.user.is_authenticated():
-        lista = get_lista(request)
         context = get_base_context(request)
-        context['carrito'] = get_pedido_detalle(pedido=context['pedido']) 
-        context['impuesto'] = lista.impuesto
+        context['pedidos'] = Pedido.objects.exclude(cliente=request.user.cliente, estado__in=('COM', 'CAN')).order_by('id')
+        context['impuesto'] = get_lista(request).impuesto
         return render(request, 'pedido.html',context)
     else:
         return HttpResponseRedirect(reverse('index'))
@@ -169,8 +171,8 @@ def checkout(request):
     if request.user.is_authenticated():
         try:
             context = get_base_context(request)
-            pedido = context['pedido']
-            pedido.cerrado = True
+            pedido = context['carrito']
+            pedido.checkout()
             pedido.save()
             subject = _("Nuevo pedido de: ") + str(pedido.cliente)
             
@@ -204,31 +206,16 @@ def get_lista(request):
 
 def get_pedido(request):
     try:
-        pedido = Pedido.objects.filter(cliente=request.user.cliente, entregado=False)[0]       
-    except Exception as e:
-        pedido = Pedido(cliente=request.user.cliente)
-        pedido.save()
+        pedido = Pedido.objects.filter(cliente=request.user.cliente, estado__iexact='ABR')[0]       
+    except:
+        try:
+            pedido = Pedido(cliente=request.user.cliente)
+            pedido.save()
+        except:
+            pedido = None
     finally:
         return pedido
-    
-
-def get_pedido_detalle(pedido):
-    pedido_bienes = PedidoYBien.objects.filter(pedido=pedido)
-    
-    carrito = []
-    for item in pedido_bienes:
-        precio = item.get_precio()
-        bien = {'id': item.bien.sign_id(),
-                'denominacion': item.bien.denominacion,
-                'codigo': item.bien.codigo,
-                'imagen': item.bien.imagen1.url,
-                'costo': "{0:.2f}".format(precio),
-                'cantidad': item.cantidad,
-                'subtotal': "{0:.2f}".format(precio * item.cantidad)
-        }
-        carrito.append(bien)
-    return carrito
-    
+        
 class LoginForm(forms.Form):
     username = forms.CharField(label=ugettext_lazy("usuario"),max_length=11, required=True)
     password = forms.CharField(label=ugettext_lazy("contraseña"),widget=forms.PasswordInput, required=True) 
@@ -249,8 +236,9 @@ class SearchForm(forms.Form):
     #            raise forms.ValidationError(ugettext_lazy("No se encontraron resultados"))
                 
 def get_base_context(request):
-    pedido = get_pedido(request) if request.user.is_authenticated() else None
-    context = {'pedido':pedido,
+    carrito = get_pedido(request) if request.user.is_authenticated() else None
+    context = {'carrito':carrito,
+               'empresa': settings.COMPANY_NAME,
                'active':resolve(request.path_info).url_name,
                }
     return context

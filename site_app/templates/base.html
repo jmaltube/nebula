@@ -35,7 +35,7 @@
                         <div class="user-menu">
                             <ul>
                                 <li><a {% if request.user.is_authenticated %} href="#" {% endif %}><span class="glyphicon glyphicon-heart" aria-hidden="true"></span> {% trans "Favoritos" %}</a></li>
-                                <li><a {% if request.user.is_authenticated %} href="/pedido" {% endif %} > <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> {% trans "Mi pedido" %}</a></li>
+                                <li><a {% if request.user.is_authenticated %} href="/pedido" {% endif %} > <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> {% trans "Mis pedidos" %}</a></li>
                             {% if not request.user.is_authenticated %}                               
                                 <li><a href="/login/"> <span class="glyphicon glyphicon-user" aria-hidden="true"></span> {% trans "Ingreso" %}</a></li>
                             </ul>
@@ -74,13 +74,17 @@
                 <div class="row">
                     <div class="col-sm-6">
                         <div class="logo">
-                            <h1><a href="/">Pampero<span>Industrial</span></a></h1>
+                            <h1><a href="/">
+                            {% for word in empresa.split %}
+                                {% cycle '' '<span>' %} {{ word }} {% cycle '' '</span>' %}
+                            {% endfor %}
+                            </a></h1>
                         </div>
                     </div>
                     {% if request.user.is_authenticated %}                               
                     <div class="col-sm-6">
                         <div class="shopping-item">
-                            <a href="/pedido">{% trans "Carro" %} - <span class="cart-amunt">${{ pedido.get_precio_total }}</span> <i class="fa fa-shopping-cart"></i> <span class="product-count">{{ pedido.get_cantidad_total }}</span></a>
+                            <a href="/pedido">{% trans "Carro" %} - <span class="cart-amunt">${{ carrito.get_precio_total }}</span> <i class="fa fa-shopping-cart"></i> <span class="product-count">{{ carrito.get_cantidad_total }}</span></a>
                         </div>
                     </div>
                     {% endif %}
@@ -103,7 +107,7 @@
                         <ul class="nav navbar-nav">
                             <li {% if active == 'index' %}class="active" {% endif %}><a href="/">{% trans "Inicio" %}</a></li>
                             <li {% if active == 'vidriera' %}class="active" {% endif %}><a href="/vidriera/">{% trans "Vidriera" %}</a></li>
-                            <li {% if active == 'pedido' %}class="active" {% endif %}><a {% if request.user.is_authenticated %} href="/pedido/" {% endif %}>{% trans "Mi pedido" %}</a></li>
+                            <li {% if active == 'pedido' %}class="active" {% endif %}><a {% if request.user.is_authenticated %} href="/pedido/" {% endif %}>{% trans "Mis pedidos" %}</a></li>
                             <li {% if active == 'contacto' %}class="active" {% endif %}><a href="/contacto">{% trans "Contacto" %}</a></li>
                         </ul>
                     </div>  
@@ -137,7 +141,7 @@
                             <ul>
                                 <li><a href="/">{% trans "Inicio" %}</a></li>
                                 <li><a href="/vidriera/">{% trans "Vidriera" %}</a></li>
-                                <li><a {% if request.user.is_authenticated %} href="/pedido/" {% endif %}>{% trans "Mi pedido" %}</a></li>
+                                <li><a {% if request.user.is_authenticated %} href="/pedido/" {% endif %}>{% trans "Mis pedidos" %}</a></li>
                                 <li><a href="/contacto">{% trans "Contacto" %}</a></li>
                             </ul>                        
                         </div>

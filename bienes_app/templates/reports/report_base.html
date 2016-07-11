@@ -1,0 +1,4 @@
+{% extends "admin/base_site.html" %}
+{% load admin_static %}
+
+{% block content_title %}{% if title %}<div><div style="display: inline-block;"><h1>{{ title }}</h1></div> {% if pdf_url %}<div style="display: inline-block; float:right;"><a href="{{ pdf_url }}"><img src="{% static 'media/pdf.png' %}"></a></div>{% endif %}</div> {% endif %}{% endblock %}

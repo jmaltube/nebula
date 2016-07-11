@@ -20,7 +20,7 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from site_app.views import index, vidriera, catalogo, pedido, login, logout, add_to_cart, remove_from_cart, checkout
 from bienes_app.views import (BienAutocomplete, ClasificadorAutocomplete, ProveedorAutocomplete,CorredorAutocomplete, duplicar_lista_view, 
-                              modificar_costo_view, imprimir_lista)
+                              modificar_costo_view, reporte_lista, reporte_pedido_pendientes)
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
@@ -41,7 +41,8 @@ urlpatterns = [
     url(r'^admin/bienes_app/cliente/corredor-autocomplete/$',CorredorAutocomplete.as_view(),name='corredor-autocomplete'),
     url(r'^admin/bienes_app/duplicar-lista/$',duplicar_lista_view, name='duplicar-lista'),
     url(r'^admin/bienes_app/modificar-costo/$',modificar_costo_view, name='modificar-costo'),
-    url(r'^admin/bienes_app/imprimir-lista/(?P<format>\w+)/(?P<lista_id>\d+)/$',imprimir_lista, name='imprimir-lista'),
+    url(r'^admin/bienes_app/reporte-lista/(?P<format>\w+)/(?P<lista_id>\d+)/$',reporte_lista, name='reporte-lista'),
+    url(r'^admin/bienes_app/reporte-pedido-pendientes/(?P<format>\w+)/(?P<ids>\d+(,\d+)*)/$',reporte_pedido_pendientes, name='reporte-pedido-pendientes'),
     url(r'^i18n/', include('django.conf.urls.i18n')),
     url(r'^admin/', admin.site.urls),
 ]

@@ -1,0 +1,23 @@
+{% extends "reports/report_base.html" %}
+
+{% block content %}
+<div id="content-main">
+    {% regroup pedidos|dictsort:"cliente.razon_social" by cliente as pedidos_sorted %}
+    {% for cliente in pedidos_sorted %}
+        <h3>{{ cliente.grouper }}</h3>
+        <ul>
+        {% for pedido in cliente.list %}
+            {% if not pedido.pendientes %}
+                <li> <a> pedido nro: <strong>{{ pedido.id }}</strong> en estado <strong>{{ pedido.get_estado_display }}</strong></a></li>
+                {% for item in pedido.pedidoybien_set.all %}
+                    {% if not item.entregado %}
+                        <li style="margin-left: 15px;"><strong>{{ item.bien.denominacion }}:</strong> <a> cant: <strong>{{ item.cantidad }}</strong></a> <a> precio venta: <strong>{{ item.get_precio }}</strong> {{ item.bien.moneda}}</a></li>
+                    {% endif %}
+                {% endfor %}
+                <br>
+            {% endif %}
+        {% endfor %}
+        </ul>
+    {% endfor %}
+</div>
+{% endblock %}

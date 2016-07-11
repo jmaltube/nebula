@@ -12,6 +12,7 @@ from django.http import HttpResponseRedirect
 from django.utils.html import format_html, format_html_join, mark_safe
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
+from bienes_app.utils import ItemsPendientesListFilter
 
 #--------------------FORMS--------------------#
 class ListaYBienForm(forms.ModelForm):
@@ -65,6 +66,15 @@ class CompraForm(forms.ModelForm):
             'proveedor': autocomplete.ModelSelect2(url='proveedor-autocomplete'),            
       
         }
+
+class PedidoYBienForm(forms.ModelForm):
+    class Meta:
+        model = PedidoYBien
+        fields = ('__all__')
+        widgets = {
+            'bien': autocomplete.ModelSelect2(url='bien-autocomplete'),            
+      
+        }
         
 #--------------------INLINES--------------------#         
 class ListaYBienInLine(admin.TabularInline):
@@ -113,8 +123,9 @@ class ClienteYClasificadorInLine(admin.TabularInline):
 
 class PedidoYBienInLine(admin.TabularInline):   
     model = PedidoYBien
-    verbose_name_plural = 'Detalle del pedido'
+    form = PedidoYBienForm
     extra = 1
+    verbose_name_plural = 'Detalle del pedido'
 
 #--------------------ACTIONS--------------------#             
 def duplicar_bien_action(modeladmin, request, queryset):
@@ -158,10 +169,17 @@ def duplicar_lista_action(modeladmin, request, queryset):
     else:
         return HttpResponseRedirect("/admin/bienes_app/lista/")
 
+def reporte_pedido_pendientes_action(modeladmin, request, queryset): 
+    if request.user.has_perm('bienes_app.action_pedido'):
+        selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
+        return HttpResponseRedirect(reverse('reporte-pedido-pendientes', kwargs={'format':'HTML','ids':",".join(selected)}))
+    else:
+        return HttpResponseRedirect("/admin/bienes_app/pedido/")
+
 #--------------------ADMINS--------------------#             
 class ListaAdmin(admin.ModelAdmin):   
     inlines = (ListaYClasificadorInLine,ListaYBienInLine)
-    list_display = ('nombre','tipo', 'moneda', 'imprimir')
+    list_display = ('nombre','tipo', 'moneda', 'reporte')
     list_filter = ('tipo',)
     ordering = ('nombre',)
     search_fields = ('nombre',)    
@@ -171,14 +189,14 @@ class ListaAdmin(admin.ModelAdmin):
     class Media:
         css = { "all" : ("css/hide_admin_original.css",) }
 
-    def imprimir(self, obj):
-        url_web = reverse('imprimir-lista', kwargs={'format':"HTML", 'lista_id':obj.id})
-        url_pdf = reverse('imprimir-lista', kwargs={'format':"PDF", 'lista_id':obj.id})
+    def reporte(self, obj):
+        url_web = reverse('reporte-lista', kwargs={'format':"HTML", 'lista_id':obj.id})
+        url_pdf = reverse('reporte-lista', kwargs={'format':"PDF", 'lista_id':obj.id})
         
         return format_html("<a href='{0}'>HTML</a> - <a href='{1}'>PDF</a>".format(url_web, url_pdf))
 
-    imprimir.short_description = 'Impresión'
-    imprimir.allow_tags = True
+    reporte.short_description = 'Reporte'
+    reporte.allow_tags = True
     
 class BienAdmin(admin.ModelAdmin): 
     def costo_base_proveedor_colored(obj):
@@ -255,12 +273,14 @@ class ClienteAdmin(admin.ModelAdmin):
         css = { "all" : ("css/hide_admin_original.css",) }
               
 class PedidoAdmin(admin.ModelAdmin):   
-       
     inlines = (PedidoYBienInLine,)
-    list_display = ('cliente','fecha_actualizacion','cerrado', 'entregado')
-    list_filter = ('cliente', 'cerrado', 'entregado')
+    list_display = ('id','cliente','fecha_actualizacion','fecha_prevista_entrega','estado', 'pendientes')
+    list_filter = (ItemsPendientesListFilter, 'estado', 'cliente', 'vendedor', )
+    list_editable = ('estado',)
     ordering = ('cliente', 'fecha_actualizacion')
-    search_fields = ('cliente',)    
+    search_fields = ('cliente', 'vendedor', 'pedido__bien')    
+    actions = (reporte_pedido_pendientes_action,)
+    reporte_pedido_pendientes_action.short_description = "Reporte de pedidos pendientes"
     
     class Media:
         css = { "all" : ("css/hide_admin_original.css",) }

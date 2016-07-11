@@ -81,7 +81,7 @@ body {
     text-align: center;
 }
 .mainmenu-area {
-    background: none repeat scroll 0 0 #F8E000;
+    background: none repeat scroll 0 0 #417690;
     font-family: "Roboto Condensed", sans-serif;
     text-transform: uppercase;
     width: 100%;
@@ -100,7 +100,7 @@ body {
     opacity: .7
 }
 .logo h1 a span {
-    color: #F8E000;
+    color: #417690;
 }
 .shopping-item {
     border: 1px solid #ddd;
@@ -114,11 +114,11 @@ body {
     color: #666;
 }
 .cart-amunt {
-    color: #F8E000;
+    color: #79aec8;
     font-weight: 700;
 }
 .product-count {
-    background: none repeat scroll 0 0 #F8E000;
+    background: none repeat scroll 0 0 #79aec8;
     border-radius: 50%;
     color: #fff;
     display: inline-block;
@@ -135,8 +135,8 @@ body {
     margin-left: 15px;
 }
 .shopping-item:hover {
-    background: none repeat scroll 0 0 #F8E000;
-    border-color: #F8E000;
+    background: none repeat scroll 0 0 #79aec8;
+    border-color: #79aec8;
 }
 .shopping-item:hover a {
     color: #fff;
@@ -187,7 +187,7 @@ body {
     vertical-align: middle
 }
 .zigzag-bottom {
-    background: none repeat scroll 0 0 #F8E000;
+    background: none repeat scroll 0 0 #79aec8;
     bottom: -80px;
     height: 165px;
     left: -5%;
@@ -250,9 +250,9 @@ body {
     z-index: -1;
 }
 .readmore {
-    background: none repeat scroll 0 0 #F8E000;
+    background: none repeat scroll 0 0 #417690;
     color: #fff;
-    border: 1px solid #F8E000;
+    border: 1px solid #79aec8;
     display: inline-block;
     font-size: 20px;
     margin-top: 15px;
@@ -266,12 +266,12 @@ body {
     border: 1px solid #fff
 }
 .promo-area {
-    background: none repeat scroll 0 0 #F8E000;
+    background: none repeat scroll 0 0 #79aec8;
     color: #fff;
     padding: 77px 0 200px;
 }
 .brands-area {
-    background: none repeat scroll 0 0 #F8E000;
+    background: none repeat scroll 0 0 #79aec8;
     color: #fff;
     padding: 0px 0 200px;
 }
@@ -280,7 +280,7 @@ body {
     background: #fff
 }
 .single-promo {
-    border: 1px solid #17a78b;
+    border: 1px solid #417690;
     font-size: 25px;
     font-weight: 200;
     padding: 20px 10px;
@@ -325,7 +325,7 @@ body {
     transition: .4s;
 }
 .product-hover a {
-    background: none repeat scroll 0 0 #F8E000;
+    background: none repeat scroll 0 0 #417690;
     border-radius: 5px;
     color: #fff;
     display: block;
@@ -336,7 +336,7 @@ body {
     position: absolute;
     text-align: center;
     text-transform: uppercase;
-    border: 1px solid #F8E000;
+    border: 1px solid #79aec8;
     width: 80%;
     z-index: 99;
     transition: .4s;
@@ -347,7 +347,7 @@ body {
     border-color: #444;
 }
 .product-carousel-price ins {
-    color: #F8E000;
+    color: #79aec8;
     font-weight: 700;
     margin-right: 5px;
     text-decoration: none;
@@ -371,7 +371,7 @@ body {
     color: #222;
 }
 .single-product p {
-    color: #F8E000;
+    color: #79aec8;
     font-weight: 700;
 }
 .single-product {
@@ -396,8 +396,8 @@ body {
 }
 .latest-product .owl-nav div,
 .related-products-wrapper .owl-nav div {
-    border: 1px solid #F8E000;
-    color: #F8E000;
+    border: 1px solid #79aec8;
+    color: #79aec8;
     display: inline-block;
     margin-left: 15px;
     padding: 1px 10px;
@@ -451,7 +451,7 @@ body {
     margin-bottom: 10px;
 }
 .product-wid-price ins {
-    color: #F8E000;
+    color: #79aec8;
     font-weight: 700;
     margin-right: 10px;
     text-decoration: none;
@@ -461,10 +461,10 @@ body {
 }
 .single-wid-product h2 a:hover,
 .single-product h2 a:hover {
-    color: #F8E000;
+    color: #79aec8;
 }
 .wid-view-more {
-    background: none repeat scroll 0 0 #F8E000;
+    background: none repeat scroll 0 0 #79aec8;
     color: #fff;
     padding: 3px 15px;
     position: absolute;
@@ -499,7 +499,7 @@ body {
     color: #fff
 }
 .footer-about-us span {
-    color: #F8E000;
+    color: #79aec8;
 }
 .footer-wid-title {
     font-family: raleway;
@@ -525,7 +525,7 @@ body {
     color: #999
 }
 .footer-social a {
-    background: none repeat scroll 0 0 #F8E000;
+    background: none repeat scroll 0 0 #79aec8;
     color: #fff;
     display: inline-block;
     font-size: 20px;
@@ -535,7 +535,7 @@ body {
     padding-top: 5px;
     text-align: center;
     width: 40px;
-    border: 1px solid #F8E000;
+    border: 1px solid #79aec8;
 }
 .footer-social a:hover {
     background-color: #222;
@@ -552,14 +552,14 @@ body {
     width: 100%;
 }
 .newsletter-form input[type="submit"] {
-    background: none repeat scroll 0 0 #F8E000;
+    background: none repeat scroll 0 0 #79aec8;
     border: medium none;
     color: #fff;
     display: inline-block;
     font-size: 18px;
     padding: 7px 20px;
     text-transform: uppercase;
-    border: 1px solid #F8E000;
+    border: 1px solid #79aec8;
 }
 .newsletter-form input[type="submit"]:hover {
     background: #222;
@@ -569,11 +569,11 @@ body {
     margin-top: 25px;
 }
 a {
-    color: #F8E000
+    color: #79aec8
 }
 a:hover,
 a:focus {
-    color: #17a78b
+    color: #417690
 }
 .footer-bottom-area {
     background: none repeat scroll 0 0 #000;
@@ -630,7 +630,7 @@ ol.slide-indicators li.active {
     margin: 10px 0 0;
 }
 .product-big-title-area {
-    background: url(img/crossword.png) repeat scroll 0 0 #F8E000
+    background: url(img/crossword.png) repeat scroll 0 0 #79aec8
 }
 .product-bit-title h2 {
     font-family: raleway;
@@ -671,7 +671,7 @@ textarea {
 }
 input[type="submit"],
 button[type=submit] {
-    background: none repeat scroll 0 0 #F8E000;
+    background: none repeat scroll 0 0 #417690;
     border: medium none;
     color: #fff;
     padding: 11px 20px;
@@ -703,7 +703,7 @@ button[type=submit]:hover {
     color: #222;
 }
 .product-sidebar-price > ins {
-    color: #F8E000;
+    color: #79aec8;
     font-weight: 700;
     margin-right: 10px;
     text-decoration: none;
@@ -758,7 +758,7 @@ button[type=submit]:hover {
     margin-bottom: 25px;
 }
 .product-inner-price > ins {
-    color: #F8E000;
+    color: #79aec8;
     font-weight: 700;
     margin-right: 10px;
     text-decoration: none;
@@ -768,12 +768,12 @@ button[type=submit]:hover {
     margin-right: 15px;
 }
 .quantity input[type="number"] {
-    border: 1px solid #F8E000;
+    border: 1px solid #79aec8;
     padding: 5px;
     width: 100px;
 }
 .add_to_cart_button {
-    background: none repeat scroll 0 0 #F8E000;
+    background: none repeat scroll 0 0 #417690;
     border: medium none;
     color: #fff;
     padding: 6px 25px;
@@ -793,15 +793,15 @@ form.cart {
 .product-tab {
     border-bottom: 1px solid #ddd;
     list-style: outside none none;
-    margin: 0 0 30px;
+    margin: 0 0 0px;
     padding: 0;
-    text-align: center;
+    text-align: left;
 }
 .product-tab li {
     display: inline-block;
 }
 .product-tab li.active {
-    background: none repeat scroll 0 0 #F8E000;
+    background: none repeat scroll 0 0 #417690;
 }
 .product-tab li.active a {
     color: #fff;
@@ -886,7 +886,7 @@ td.product-name {
 }
 div.quantity input.plus,
 div.quantity input.minus {
-    background: none repeat scroll 0 0 #F8E000;
+    background: none repeat scroll 0 0 #79aec8;
     border: medium none;
     color: #fff;
     height: 25px;
@@ -914,9 +914,9 @@ td.actions div.coupon {
     width: 40%;
 }
 .cart-collaterals h2 {
-    color: #F8E000;
+    color: #79aec8;
     font-size: 25px;
-    margin-bottom: 25px;
+    margin-bottom: 5px;
     text-transform: uppercase;
 }
 div.cart-collaterals ul.products {
@@ -945,7 +945,7 @@ div.cart-collaterals ul.products li.product {
     background: none repeat scroll 0 0 #f4f4f4;
 }
 .onsale {} div.cart-collaterals ul.products li.product .onsale {
-    background: none repeat scroll 0 0 #F8E000;
+    background: none repeat scroll 0 0 #79aec8;
     color: #fff;
     padding: 5px 10px;
     position: absolute;
@@ -963,7 +963,7 @@ div.cart-collaterals ul.products li.product .price {
     overflow: hidden;
 }
 .price > ins {} div.cart-collaterals ul.products li.product .price ins {
-    color: #F8E000;
+    color: #79aec8;
     font-weight: 700;
     margin-left: 10px;
     text-decoration: none;
@@ -995,7 +995,7 @@ div.cart-collaterals ul.products li.product .price {
     width: 100%;
 }
 #customer_details h3 {
-    color: #F8E000;
+    color: #79aec8;
     font-size: 20px;
     text-transform: uppercase;
 }
@@ -1005,7 +1005,7 @@ div.cart-collaterals ul.products li.product .price {
     padding: 15px;
 }
 #order_review_heading {
-    color: #F8E000;
+    color: #79aec8;
     font-size: 20px;
     text-transform: uppercase;
 }
@@ -1042,7 +1042,7 @@ table.shop_table td.product-name a {
     color: #222;
 }
 table.shop_table td.product-name a:hover {
-    color: #F8E000;
+    color: #79aec8;
     text-decoration: none
 }
 div.quantity input.plus:hover,
@@ -1050,7 +1050,7 @@ div.quantity input.minus:hover {
     background-color: #222
 }
 div.cart-collaterals ul.products li.product a:hover h3 {
-    color: #F8E000
+    color: #79aec8
 }
 div.cart-collaterals ul.products li.product a:hover {
     text-decoration: none
@@ -1098,7 +1098,7 @@ div.cart-collaterals ul.products li.product:hover .add_to_cart_button {
 }
 
 .panel-default .panel-heading{
-    background-color: #F8E000    
+    background-color: #79aec8    
 }
 
 .panel-default .panel-heading .panel-title{
@@ -1113,7 +1113,7 @@ div.cart-collaterals ul.products li.product:hover .add_to_cart_button {
 }
 .pagination > li > a,
 .pagination > li > span {
-    color: #F8E000;
+    color: #79aec8;
 }
 
 .form-group {

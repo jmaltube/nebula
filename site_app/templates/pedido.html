@@ -1,109 +1,132 @@
-{% extends "base.html" %}
-{% load static from staticfiles %}
-{% load i18n %}
-
-{% block body %} 
-    <div class="product-big-title-area">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="product-bit-title text-center">
-                        <h2>{% trans "Mi pedido" %}</h2>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div> <!-- End Page title area -->
-    
-    
-    <div class="single-product-area">
-        <div class="zigzag-bottom"></div>
-        <div class="container">
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="product-content-right">
-                        <div class="woocommerce">
-                            {% if impuesto %} <a> {% blocktrans %} *Precio con {{ impuesto }} incluido {% endblocktrans %}</a> {% endif %}
-                                <table cellspacing="0" class="shop_table cart">
-                                    <thead>
-                                        <tr>
-                                            <th class="product-remove">&nbsp;</th>
-                                            <th class="product-thumbnail">&nbsp;</th>
-                                            <th class="product-name">{% trans "Producto" %}</th>
-                                            <th class="product-name">{% trans "Codigo" %}</th>
-                                            <th class="product-price">{% trans "Precio" %}</th>
-                                            <th class="product-quantity">{% trans "Cantidad" %}</th>
-                                            <th class="product-subtotal">{% trans "Total" %}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for bien in carrito %}
-                                            <tr class="cart_item">
-                                                <td class="product-remove">
-                                                    <a title="Remove this item" class="remove" href="/remove_from_cart/?bien_id={{ bien.id }}&next_url=/pedido">×</a> 
-                                                </td>
-
-                                                <td class="product-thumbnail">
-                                                    <a href="/catalogo/?bien_id={{ bien.id }}"><img width="145" height="145" alt="{{ bien.denominacion }}" class="shop_thumbnail" src="{{ bien.imagen }}"></a>
-                                                </td>
-                                              
-                                                <td class="product-name">
-                                                    <a href="/catalogo/?bien_id={{ bien.id }}">{{ bien.denominacion }}</a> 
-                                                </td>
-                                                <td class="product-price">
-                                                    <span class="amount">{{ bien.codigo }}</span> 
-                                                </td>
-                                                <td class="product-price">
-                                                    <span class="amount">{{ bien.costo }}</span> 
-                                                </td>
-
-                                                <td class="product-quantity">
-                                                    <span class="amount">{{ bien.cantidad }}</span> 
-                                                </td>
-
-                                                <!-- <td class="product-quantity">
-                                                    <div class="quantity buttons_added">
-                                                        <input type="button" class="minus" value="-">
-                                                        <input type="number" size="4" class="input-text qty text" title="Qty" value="1" min="0" step="1">
-                                                        <input type="button" class="plus" value="+">
-                                                    </div>
-                                                </td> -->
-
-                                                <td class="product-subtotal">
-                                                    <span class="amount">{{ bien.subtotal }}</span> 
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                        <tr>
-                                            <td class="actions" colspan="7">
-                                                <a class="add_to_cart_button" href="/checkout" style="float: right"> {% trans "Confirmar pedido" %} </a>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-
-                            <div class="cart-collaterals">
-                                <div class="cart_totals ">
-                                    <h2>{% trans "Totales" %}</h2>
-
-                                    <table cellspacing="0">
-                                        <tbody>
-                                            <tr class="cart-subtotal">
-                                                <th>{% trans "Subtotal" %}</th>
-                                                <td><span class="amount">{{ pedido.get_precio_total }}</span></td>
-                                            </tr>
-                                            <tr class="order-total">
-                                                <th>{% trans "Total" %}</th>
-                                                <td><strong><span class="amount">{{ pedido.get_precio_total }}</span></strong> </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>                        
-                    </div>                    
+{% extends "base.html" %} {% load static from staticfiles %} {% load i18n %} {% block body %}
+<div class="product-big-title-area">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="product-bit-title text-center">
+                    <h2>{% trans "Mis pedidos" %}</h2>
                 </div>
             </div>
         </div>
     </div>
+</div>
+<!-- End Page title area -->
+
+
+<div class="single-product-area">
+    <div class="zigzag-bottom"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="product-content-right">
+                    <div class="woocommerce">
+                        <div role="tabpanel">
+                            <ul class="product-tab" role="tablist">
+                                {% for pedido in pedidos %}
+                                <li role="presentation" {% if forloop.last %} class="active" {% endif %}><a href="#{{ pedido.id }}" aria-controls="{{ pedido.id }}" role="tab" data-toggle="tab"> #{{ pedido.id }}</a></li>
+                                {% endfor %}
+                            </ul>
+                            <div class="tab-content">
+                                {% for pedido in pedidos %}
+                                <div role="tabpanel" {% if forloop.last %} class="tab-pane fade in active" {% else %} class="tab-pane fade" {% endif %} id="{{ pedido.id }}">
+                                    <a>{% trans "Estado del pedido" %}: <strong>{{ pedido.get_estado_display }}</strong></a> 
+                                    <table cellspacing="0" class="shop_table cart">
+                                        <thead>
+                                            <tr>
+                                                <th class="product-remove">&nbsp;</th>
+                                                <th class="product-thumbnail">&nbsp;</th>
+                                                <th class="product-name">{% trans "Producto" %}</th>
+                                                <th class="product-name">{% trans "Codigo" %}</th>
+                                                <th class="product-price">{% trans "Precio" %}</th>
+                                                <th class="product-quantity">{% trans "Cantidad" %}</th>
+                                                <th class="product-subtotal">{% trans "Total" %}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in pedido.pedidoybien_set.all %}
+
+                                            <tr class="cart_item">
+                                                <td class="product-remove">
+                                                    <a title="Remove this item" class="remove" href="/remove_from_cart/?bien_id={{ item.bien.sign_id }}&next_url=/pedido">×</a>
+                                                </td>
+                                                <td class="product-thumbnail">
+                                                    <a href="/catalogo/?bien_id={{ item.bien.sign_id }}"><img width="145" height="145" alt="{{ item.bien.denominacion }}" class="shop_thumbnail"
+                                                            src="{{ item.bien.imagen1.url }}"></a>
+                                                </td>
+                                                <td class="product-name">
+                                                    <a href="/catalogo/?bien_id={{ item.bien.sign_id }}">{{ item.bien.denominacion }}</a>
+                                                </td>
+                                                <td class="product-price">
+                                                    <span class="amount">{{ item.bien.codigo }}</span>
+                                                </td>
+                                                <td class="product-price">
+                                                    <span class="amount">{{ item.get_precio }}</span>
+                                                </td>
+                                                <td class="product-quantity">
+                                                    <span class="amount">{{ item.cantidad }}</span>
+                                                </td>
+                                                <!-- <td class="product-quantity">
+                                                            <div class="quantity buttons_added">
+                                                                <input type="button" class="minus" value="-">
+                                                                <input type="number" size="4" class="input-text qty text" title="Qty" value="1" min="0" step="1">
+                                                                <input type="button" class="plus" value="+">
+                                                            </div>
+                                                        </td> -->
+                                                <td class="product-subtotal">
+                                                    <span class="amount">{{ item.subtotal }}</span>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                            <tr>
+                                                {% if pedido.abierto and pedido.get_cantidad_total > 0 %}
+                                                <td class="actions" colspan="7">
+                                                    <a class="add_to_cart_button confirm" href=# style="float: right"> {% trans "Confirmar pedido" %} </a>
+                                                </td>
+                                                {% endif %}
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <div class="cart-collaterals">
+                                        <div class="cart_totals ">
+                                            <h2>{% trans "Totales" %}</h2>
+                                            {% if impuesto %} <strong> {% blocktrans %} Precio con {{ impuesto }} incluido {% endblocktrans %}</strong>{% endif %}
+                                            <table cellspacing="0">
+                                                <tbody>
+                                                    <tr class="cart-subtotal">
+                                                        <th>{% trans "Subtotal" %}</th>
+                                                        <td><span class="amount">{{ pedido.get_precio_total }}</span></td>
+                                                    </tr>
+                                                    <tr class="order-total">
+                                                        <th>{% trans "Total" %}</th>
+                                                        <td><strong><span class="amount">{{ pedido.get_precio_total }}</span></strong> </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                              {% endfor %}
+                            </div> <!-- "tab-content" -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
+
+{% block extrajs %} 
+        <script src="{% static 'js/bootbox.min.js' %}"></script>
+        <script>
+        
+        $(document).on("click", ".confirm", function(e) {
+            bootbox.confirm("¿Realmente desea confirmar el pedido. Esta confirmación no puede ser deshecha. Se notificará por correo al vendedor con copia a ud. mismo con el detalle de su pedido.", function(result) {
+                if (result){
+                    document.location.href = "/checkout";
+                }
+            });
+        });
+        </script>
+        
+{% endblock%}

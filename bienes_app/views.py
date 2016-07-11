@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render
 from dal import autocomplete
-from bienes_app.models import Bien, Compra, Lista, ListaYClasificador, ListaYBien, Clasificador, Proveedor
+from bienes_app.models import Bien, Compra, Lista, ListaYClasificador, ListaYBien, Clasificador, Proveedor, Pedido
 from django.http import HttpResponse, HttpResponseRedirect
+from django.core.urlresolvers import reverse
 from copy import deepcopy
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db import transaction, IntegrityError
@@ -15,7 +16,7 @@ from django.conf import settings
 from pdfkit import from_string, configuration
 from os import remove 
 from django.conf import settings
-
+import datetime
 #--------------------PRIVATE--------------------#                         
 
 @transaction.atomic
@@ -106,7 +107,29 @@ def modificar_costo_proveedor(id, tipo, valor):
         
         opcion_proveedor.save()
     except MultipleObjectsReturned:
-        return        
+        return      
+        
+def generate_pdf(request, template_path, context, file_name):
+    html_template = get_template(template_path)
+    rendered_html = html_template.render(request=request, context=context)#.encode(encoding="UTF-8")
+    options = {
+        'page-size': 'Letter',
+        'margin-top': '0.25in',
+        'margin-right': '0.25in',
+        'margin-bottom': '0.25in',
+        'margin-left': '0.25in',
+        'encoding': "UTF-8",
+    } #'no-outline': None
+    css = '{0}/css/base.css'.format(settings.STATICFILES_DIRS[0])
+    pdf_name = "{0}/pdf/{1}.pdf".format(settings.STATICFILES_DIRS[0], file_name)
+    config = configuration(wkhtmltopdf=bytes(settings.PATH_TO_WKHTMLTOPDF, 'utf-8'))
+    from_string(rendered_html, pdf_name, options=options, css=css, configuration=config)
+    pdf = open(pdf_name,mode='rb')#,encoding = "ISO-8859-1")
+    response = HttpResponse(pdf.read(), content_type='application/pdf')  # Generates the response as pdf response.
+    response['Content-Disposition'] = 'attachment; filename={0}.pdf'.format(file_name)
+    pdf.close()
+    remove(pdf_name)  # remove the locally created pdf file.
+    return response              
 #--------------------PUBLIC--------------------#
 
 class BienAutocomplete(autocomplete.Select2QuerySetView):
@@ -178,7 +201,7 @@ def duplicar_lista_view(request):
     else:        
         form = DuplicarListaForm()        
         form.fields['ids'].initial = request.GET.get('ids')              
-    return render(request, 'duplicar_lista.html', {'title':'Duplicar lista','form':form, 'opts':Lista._meta})        
+    return render(request, 'forms/duplicar_lista.html', {'title':'Duplicar lista','form':form, 'opts':Lista._meta})        
     
 class ModificarCostoForm(forms.Form):
     Tipo = [('POR','Porcentaje'), ('VAL','Valor fijo')]
@@ -210,36 +233,34 @@ def modificar_costo_view(request):
         form.fields['ids'].initial = request.GET.get('ids')
         form.fields['modelo'].initial = request.GET.get('modelo')
         
-    return render(request, 'modificar_costo.html', {'title':'Modificar costo','form':form,'opts':Bien._meta})    
+    return render(request, 'forms/modificar_costo.html', {'title':'Modificar costo','form':form,'opts':Bien._meta})    
 
 @login_required(login_url='/admin/login/')
-def imprimir_lista(request, lista_id, format='HTML'):
+def reporte_lista(request, lista_id=None, format='HTML'):
     try:
         l = Lista.objects.get(id=int(lista_id))
         lista = l.get_bienes()
         context = {'title':l.nombre,'lista':lista, 'opts':Lista._meta}
         if format == "HTML":
-            return render(request, 'imprimir_lista.html',context=context)
+            return render(request, 'reports/lista.html',context=context)
         elif format == "PDF":
-            html_template = get_template('imprimir_lista.html')
-            rendered_html = html_template.render(request=request, context=context)#.encode(encoding="UTF-8")
-            options = {
-                'page-size': 'Letter',
-                'margin-top': '0.25in',
-                'margin-right': '0.25in',
-                'margin-bottom': '0.25in',
-                'margin-left': '0.25in',
-                'encoding': "UTF-8",
-            } #'no-outline': None
-            css = '{0}/css/base.css'.format(settings.STATICFILES_DIRS[0])
-            pdf_name = "{0}/pdf/lista.pdf".format(settings.STATICFILES_DIRS[0])
-            config = configuration(wkhtmltopdf=bytes(settings.PATH_TO_WKHTMLTOPDF, 'utf-8'))
-            from_string(rendered_html, pdf_name, options=options, css=css, configuration=config)
-            pdf = open(pdf_name,mode='rb')#,encoding = "ISO-8859-1")
-            response = HttpResponse(pdf.read(), content_type='application/pdf')  # Generates the response as pdf response.
-            response['Content-Disposition'] = 'attachment; filename={0}.pdf'.format(l.nombre)
-            pdf.close()
-            remove(pdf_name)  # remove the locally created pdf file.
-            return response
+            return generate_pdf(request,'reports/lista.html',context, file_name )
     except Exception as e:
         return HttpResponseServerError(e)
+        
+@login_required(login_url='/admin/login/')
+def reporte_pedido_pendientes(request, ids=None, format='HTML'):
+#    try:
+    pedidos = Pedido.objects.filter(id__in=ids.split(',')) #.select_related('cliente')
+    context = {'title':'Lista de pedidos con pendientes','pedidos':pedidos,'opts':Pedido._meta}
+    if format == "HTML":
+        pdf_url = reverse('reporte-pedido-pendientes', kwargs={'format':'PDF','ids':ids})
+        context['pdf_url'] = pdf_url
+        return render(request, 'reports/pedido_pendientes.html',context=context)
+    elif format == "PDF":            
+        file_name = "Pedido_pendientes_{0}".format(str(datetime.date.today()))
+        return generate_pdf(request,'reports/pedido_pendientes.html',context, file_name )
+#    except Exception as e:
+#        return HttpResponseServerError()  
+#        return HttpResponseRedirect('/admin/bienes_app/pedido/')
+              

@@ -482,41 +482,59 @@ class ClienteYBien(models.Model):
         return self.cliente.razon_social + "||" + self.bien.denominacion
         
 class Pedido(models.Model):
-    Status = [ ('ABR','Abierto'),('CHK', 'Confirmado'),('PRE', 'En preparación'), ('COM', 'Completo'), ('CAN', 'Cancelado')]
+    Status = [ ('ABR','Abierto'),('CHK', 'Confirmado por cliente'),('PRE', 'En preparación'), ('COM', 'Completo'), ('CAN', 'Cancelado')]
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
-    fecha_actualizacion = models.DateField(auto_now=True)
-    status = models.CharField(max_length=3, choices=Status, default='ABR')
+    fecha_actualizacion = models.DateField(verbose_name='Ult. modificación',auto_now=True)
+    fecha_prevista_entrega = models.DateField(blank=True, null=True)
+    estado = models.CharField(max_length=3, choices=Status, default='ABR')
     bienes = models.ManyToManyField(Bien, through='PedidoYBien')
-    cerrado = models.BooleanField(default=False, blank=True)
-    entregado = models.BooleanField(default=False, blank=True)
+    vendedor = models.ForeignKey(Proveedor, on_delete=models.SET_NULL, null=True, blank=True, limit_choices_to={'corredor':True})
+    observaciones = models.TextField(null=True, blank=True) 
     
     def get_precio_total(self):   
         total = 0
         for pedidoybien in self.pedidoybien_set.all():
             total += self.cliente.lista.get_bienes(search_bien_id=pedidoybien.bien.id, cliente=self.cliente).costo * pedidoybien.cantidad
         return total
-        
+
     def get_cantidad_total(self):
         return self.bienes.all().count()
-        
+
+    def pendientes(self):
+        return not self.pedidoybien_set.filter(entregado=False).exists()
+    pendientes.boolean = True
+    pendientes.short_description = 'Estado pendientes'
+    
+    def abierto(self):
+        return True if self.estado == 'ABR' else False
+    
+    def checkout(self):
+        self.estado = 'CHK'
+            
     def __str__(self):
         return str(self.cliente)
 
     def __unicode__(self):
         return str(self.cliente)
-            
+    
+    class Meta:
+        permissions = (("action_pedido", "Ejecutar acciones"),)
+                
 class PedidoYBien(models.Model):
     pedido = models.ForeignKey(Pedido)
     bien = models.ForeignKey(Bien)
-    cantidad = models.IntegerField()
+    cantidad = models.IntegerField(validators=[MinValueValidator(0, message="Solo cantidades positivas.")])
     descuento = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
-    
+    observaciones = models.CharField(max_length=100, null=True, blank=True)
+    entregado = models.BooleanField(default=False)
+        
     def get_precio(self):
         if self.descuento:
                 dto = 1-(self.descuento/100)
         else:
             dto = 1
-        precio = self.pedido.cliente.lista.get_bienes(include_hidden=False, search_bien_id=self.bien.id, cliente=self.pedido.cliente).costo * dto
+        precio = round(self.pedido.cliente.lista.get_bienes(include_hidden=False, search_bien_id=self.bien.id, cliente=self.pedido.cliente).costo * dto,2)
         return precio or 0
         
-
+    def subtotal(self):
+        return self.get_precio() * self.cantidad
