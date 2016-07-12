@@ -10,14 +10,23 @@ from django.core.urlresolvers import reverse,resolve
 from django.contrib.auth import authenticate, login as admin_login, logout as admin_logout
 from django.core.signing import Signer
 from django.core.mail import mail_admins, send_mail
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.utils.translation import ugettext as _
 from django.utils.translation import ugettext_lazy
 from django.conf import settings
 
 #////////////////////# PUBLIC #////////////////////# 
-def index(request):    
+def index(request):
     context = get_base_context(request)
+    lista = get_lista(request)
+    try:
+        cliente = request.user.cliente if request.user.is_authenticated() else None
+        bienes = lista.get_bienes(include_hidden=False, cliente=cliente)
+        ids = [bien.id for bien in bienes]  
+        top_bienes = Bien.objects.filter(pk__in=ids, visible=True).annotate(rank=Count('pedido')).order_by('-rank')[:10]
+        context['top_bienes'] = top_bienes 
+    except Exception as e:
+        pass
     return render(request, 'index.html',context)
     
 def vidriera(request):

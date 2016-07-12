@@ -1,8 +1,8 @@
-#https://docs.djangoproject.com/en/1.9/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
-from django.contrib import admin
+# -*- coding: utf-8 -*-
+from django.contrib.admin import SimpleListFilter
 from django.utils.translation import ugettext_lazy as _
 
-class ItemsPendientesListFilter(admin.SimpleListFilter):
+class ItemsPendientesListFilter(SimpleListFilter):
     # Human-readable title which will be displayed in the
     # right admin sidebar just above the filter options.
     title = _('Estado pendientes')

@@ -1,207 +1,201 @@
-{% extends "base.html" %}
-{% load static from staticfiles %}
-{% load i18n %}
+{% extends "base.html" %} {% load static from staticfiles %} {% load i18n %} {% block extracss%}
+<link rel="stylesheet" href="{% static 'css/lightgallery.css' %}"> {% endblock %} {% block body %}
 
-{% block extracss%}
-<link rel="stylesheet" href="{% static 'css/lightgallery.css' %}">
-{% endblock %}
 
-{% block body %} 
-
-                        
-    <div class="product-big-title-area">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="product-bit-title text-center">
-                        <h2>Catálogo</h2>
-                    </div>
+<div class="product-big-title-area">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="product-bit-title text-center">
+                    <h2>Catálogo</h2>
                 </div>
             </div>
         </div>
     </div>
-    
-    
-    <div class="single-product-area">
-        <div class="zigzag-bottom"></div>
-        <div class="container">
-            <div class="row">
-              
-                {% if bien %}
-                <div class="col-md-12">
-                    <div class="product-content-right">
-                        <div class="product-breadcroumb">
-                            <a>{% trans "Clasificador" %}: {{ bien.clasificador }}</a>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <div class="product-images">
-                                    <div class="img-responsive" alt="Responsive image">
-                                        <img src="{{ bien.imagen1.url }}" alt="">
-                                    </div>
-                                    
-                                    <div class="product-gallery" id="product-gallery"> 
-                                        {% if bien.imagen1 %} <a href="{{ bien.imagen1.url }}"> <img src="{{ bien.imagen1.url }}" class="img-rounded" alt=""> </a> {% endif %}
-                                        {% if bien.imagen2 %} <a href="{{ bien.imagen2.url }}"> <img src="{{ bien.imagen2.url }}" class="img-rounded" alt=""> </a> {% endif %} 
-                                        {% if bien.imagen3 %} <a href="{{ bien.imagen3.url }}"> <img src="{{ bien.imagen3.url }}" class="img-rounded" alt=""> </a> {% endif %}
-                                        {% if bien.imagen4 %} <a href="{{ bien.imagen4.url }}"> <img src="{{ bien.imagen4.url }}" class="img-rounded" alt=""> </a> {% endif %}
-                                        {% if bien.imagen5 %} <a href="{{ bien.imagen5.url }}"> <img src="{{ bien.imagen5.url }}" class="img-rounded" alt=""> </a> {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="col-sm-6">
-                                <div class="product-inner">
-                                    <h2 class="product-name">{{ bien.denominacion }}</h2>
-                                    <div class="product-inner-price">
-                                        <ins>${{ bien.costo }}</ins><!-- <del>$800.00</del> -->
-                                        {% if impuesto %} <a> {% blocktrans %} *Precio con {{ impuesto }} incluido {% endblocktrans %}</a> {% endif %}
-                                    </div>    
-                                    {% if request.user.is_authenticated %}
-                                        <form action="." class="cart" method="post" >
-                                            {% csrf_token %}
-                                            <div class="quantity">
-                                                <input type="number" size="10" class="input-text qty text" title="Qty" value="1" name="cantidad" min="1" step="1">
-                                            </div>
-                                            <input type="hidden" name="bien_id" value={{ bien.sign_id }}>
-                                            <button class="add_to_cart_button" name="add_to_cart_button" type="submit">{% trans "Agregar" %}</button>
-                                        </form>   
-                                    {% endif %}
-                                    <div class="product-inner-category">
-                                        <p>{% trans "Código" %}: <a>{{ bien.codigo }}</a> {% trans "Etiquetas" %}: <a> {{ bien.tags }}</a></p>
-                                    </div> 
-                                </div>
-                               </div>
-                              </div> 
-                            <div class="row">
-                            <div class="col-sm-6">        
-                                    <div role="tabpanel">
-                                        <ul class="product-tab" role="tablist">
-                                            {% for atributo in atributos %}
-                                                <li role="presentation" {% if forloop.first %} class="active" {% endif %} ><a href="#{{ atributo.id }}" aria-controls="{{ atributo.id }}" role="tab" data-toggle="tab">{{ atributo.atributo }}</a></li>
-                                            {% endfor %}
-                                        </ul>
-                                        <div class="tab-content">
-                                        {% for atributo in atributos %}
-                                            
-                                                <div role="tabpanel" {% if forloop.first %} class="tab-pane fade in active" {% else %} class="tab-pane fade" {% endif %} id="{{ atributo.id }}">
-                                                    <h2>{{ atributo.atributo }}</h2>  
-                                                    <p> {{ atributo.texto }}</p>
-                                                </div>
-                                            
-                                        {% endfor %}
-                                        </div>   
-                                </div>
-                            </div>
-                        </div>
-                        
+</div>
 
-                        
-                        
-                        
-                        <div class="related-products-wrapper">
-                            <h2 class="related-products-title">Related Products</h2>
-                            <div class="related-products-carousel">
-                                <div class="single-product">
-                                    <div class="product-f-image">
-                                       <img id="zoom_01" src="/static/media/product-1.jpg" data-zoom-image="/static/media/product-1.jpg" />
-                                    </div>
 
-                                    <h2><a href="">Sony Smart TV - 2015</a></h2>
+<div class="single-product-area">
+    <div class="zigzag-bottom"></div>
+    <div class="container">
+        <div class="row">
 
-                                    <div class="product-carousel-price">
-                                        <ins>$700.00</ins> <del>$800.00</del>
-                                    </div> 
-                                </div>
-                                <div class="single-product">
-                                    <div class="product-f-image">
-                                        <img src="/static/media/product-2.jpg" alt="">
-                                        <div class="product-hover">
-                                            <a href="" class="add-to-cart-link">  Add to cart</a>
-                                            <a href="" class="view-details-link">  See details</a>
-                                        </div>
-                                    </div>
-
-                                    <h2><a href="">Apple new mac book 2015 March :P</a></h2>
-                                    <div class="product-carousel-price">
-                                        <ins>$899.00</ins> <del>$999.00</del>
-                                    </div> 
-                                </div>
-                                <div class="single-product">
-                                    <div class="product-f-image">
-                                        <img src="/static/media/product-3.jpg" alt="">
-                                        <div class="product-hover">
-                                            <a href="" class="add-to-cart-link"><i class="fa fa-shopping-cart"></i> Add to cart</a>
-                                            <a href="" class="view-details-link"><i class="fa fa-link"></i> See details</a>
-                                        </div>
-                                    </div>
-
-                                    <h2><a href="">Apple new i phone 6</a></h2>
-
-                                    <div class="product-carousel-price">
-                                        <ins>$400.00</ins> <del>$425.00</del>
-                                    </div>                                 
-                                </div>
-                                <div class="single-product">
-                                    <div class="product-f-image">
-                                        <img src="/static/media/product-4.jpg" alt="">
-                                        <div class="product-hover">
-                                            <a href="" class="add-to-cart-link"><i class="fa fa-shopping-cart"></i> Add to cart</a>
-                                            <a href="" class="view-details-link"><i class="fa fa-link"></i> See details</a>
-                                        </div>
-                                    </div>
-
-                                    <h2><a href="">Sony playstation microsoft</a></h2>
-
-                                    <div class="product-carousel-price">
-                                        <ins>$200.00</ins> <del>$225.00</del>
-                                    </div>                            
-                                </div>
-                                <div class="single-product">
-                                    <div class="product-f-image">
-                                        <img src="/static/media/product-5.jpg" alt="">
-                                        <div class="product-hover">
-                                            <a href="" class="add-to-cart-link"><i class="fa fa-shopping-cart"></i> Add to cart</a>
-                                            <a href="" class="view-details-link"><i class="fa fa-link"></i> See details</a>
-                                        </div>
-                                    </div>
-
-                                    <h2><a href="">Sony Smart Air Condtion</a></h2>
-
-                                    <div class="product-carousel-price">
-                                        <ins>$1200.00</ins> <del>$1355.00</del>
-                                    </div>                                 
-                                </div>
-                                <div class="single-product">
-                                    <div class="product-f-image">
-                                        <img src="/static/media/product-6.jpg" alt="">
-                                        <div class="product-hover">
-                                            <a href="" class="add-to-cart-link"><i class="fa fa-shopping-cart"></i> Add to cart</a>
-                                            <a href="" class="view-details-link"><i class="fa fa-link"></i> See details</a>
-                                        </div>
-                                    </div>
-
-                                    <h2><a href="">Samsung gallaxy note 4</a></h2>
-
-                                    <div class="product-carousel-price">
-                                        <ins>$400.00</ins>
-                                    </div>                            
-                                </div>                                    
-                            </div>
-                        </div>
-                        
+            {% if bien %}
+            <div class="col-md-12">
+                <div class="product-content-right">
+                    <div class="product-breadcroumb">
+                        <a>{% trans "Clasificador" %}: {{ bien.clasificador }}</a>
                     </div>
-                    {% endif %}                    
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="product-images">
+                                <div class="img-responsive" alt="Responsive image">
+                                    <img src="{{ bien.imagen1.url }}" alt="">
+                                </div>
+
+                                <div class="product-gallery" id="product-gallery">
+                                    {% if bien.imagen1 %}
+                                    <a href="{{ bien.imagen1.url }}"> <img src="{{ bien.imagen1.url }}" class="img-rounded" alt=""> </a> {% endif %} {% if bien.imagen2 %}
+                                    <a href="{{ bien.imagen2.url }}"> <img src="{{ bien.imagen2.url }}" class="img-rounded" alt=""> </a> {% endif %} {% if bien.imagen3 %}
+                                    <a href="{{ bien.imagen3.url }}"> <img src="{{ bien.imagen3.url }}" class="img-rounded" alt=""> </a> {% endif %} {% if bien.imagen4 %}
+                                    <a href="{{ bien.imagen4.url }}"> <img src="{{ bien.imagen4.url }}" class="img-rounded" alt=""> </a> {% endif %} {% if bien.imagen5 %}
+                                    <a href="{{ bien.imagen5.url }}"> <img src="{{ bien.imagen5.url }}" class="img-rounded" alt=""> </a> {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="product-inner">
+                                <h2 class="product-name">{{ bien.denominacion }}</h2>
+                                <div class="product-inner-price">
+                                    <ins>${{ bien.costo }}</ins>
+                                    <!-- <del>$800.00</del> -->
+                                    {% if impuesto %} <a> {% blocktrans %} *Precio con {{ impuesto }} incluido {% endblocktrans %}</a>{% endif %}
+                                </div>
+                                {% if request.user.is_authenticated %}
+                                <form action="." class="cart" method="post">
+                                    {% csrf_token %}
+                                    <div class="quantity">
+                                        <input type="number" size="10" class="input-text qty text" title="Qty" value="1" name="cantidad" min="1" step="1">
+                                    </div>
+                                    <input type="hidden" name="bien_id" value={{ bien.sign_id }}>
+                                    <button class="add_to_cart_button" name="add_to_cart_button" type="submit">{% trans "Agregar" %}</button>
+                                </form>
+                                {% endif %}
+                                <div class="product-inner-category">
+                                    <p>{% trans "Código" %}: <a>{{ bien.codigo }}</a> {% trans "Etiquetas" %}: <a> {{ bien.tags }}</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div role="tabpanel">
+                                <ul class="product-tab" role="tablist">
+                                    {% for atributo in atributos %}
+                                    <li role="presentation" {% if forloop.first %} class="active" {% endif %}><a href="#{{ atributo.id }}" aria-controls="{{ atributo.id }}" role="tab" data-toggle="tab">{{ atributo.atributo }}</a></li>
+                                    {% endfor %}
+                                </ul>
+                                <div class="tab-content">
+                                    {% for atributo in atributos %}
+
+                                    <div role="tabpanel" {% if forloop.first %} class="tab-pane fade in active" {% else %} class="tab-pane fade" {% endif %}
+                                        id="{{ atributo.id }}">
+                                        <h2>{{ atributo.atributo }}</h2>
+                                        <p> {{ atributo.texto }}</p>
+                                    </div>
+
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="related-products-wrapper">
+                        <h2 class="related-products-title">Related Products</h2>
+                        <div class="related-products-carousel">
+                            <div class="single-product">
+                                <div class="product-f-image">
+                                    <img id="zoom_01" src="/static/media/product-1.jpg" data-zoom-image="/static/media/product-1.jpg" />
+                                </div>
+
+                                <h2><a href="">Sony Smart TV - 2015</a></h2>
+
+                                <div class="product-carousel-price">
+                                    <ins>$700.00</ins>
+                                    <del>$800.00</del>
+                                </div>
+                            </div>
+                            <div class="single-product">
+                                <div class="product-f-image">
+                                    <img src="/static/media/product-2.jpg" alt="">
+                                    <div class="product-hover">
+                                        <a href="" class="add-to-cart-link">  Add to cart</a>
+                                        <a href="" class="view-details-link">  See details</a>
+                                    </div>
+                                </div>
+
+                                <h2><a href="">Apple new mac book 2015 March :P</a></h2>
+                                <div class="product-carousel-price">
+                                    <ins>$899.00</ins>
+                                    <del>$999.00</del>
+                                </div>
+                            </div>
+                            <div class="single-product">
+                                <div class="product-f-image">
+                                    <img src="/static/media/product-3.jpg" alt="">
+                                    <div class="product-hover">
+                                        <a href="" class="add-to-cart-link"><i class="fa fa-shopping-cart"></i> Add to cart</a>
+                                        <a href="" class="view-details-link"><i class="fa fa-link"></i> See details</a>
+                                    </div>
+                                </div>
+
+                                <h2><a href="">Apple new i phone 6</a></h2>
+
+                                <div class="product-carousel-price">
+                                    <ins>$400.00</ins>
+                                    <del>$425.00</del>
+                                </div>
+                            </div>
+                            <div class="single-product">
+                                <div class="product-f-image">
+                                    <img src="/static/media/product-4.jpg" alt="">
+                                    <div class="product-hover">
+                                        <a href="" class="add-to-cart-link"><i class="fa fa-shopping-cart"></i> Add to cart</a>
+                                        <a href="" class="view-details-link"><i class="fa fa-link"></i> See details</a>
+                                    </div>
+                                </div>
+
+                                <h2><a href="">Sony playstation microsoft</a></h2>
+
+                                <div class="product-carousel-price">
+                                    <ins>$200.00</ins>
+                                    <del>$225.00</del>
+                                </div>
+                            </div>
+                            <div class="single-product">
+                                <div class="product-f-image">
+                                    <img src="/static/media/product-5.jpg" alt="">
+                                    <div class="product-hover">
+                                        <a href="" class="add-to-cart-link"><i class="fa fa-shopping-cart"></i> Add to cart</a>
+                                        <a href="" class="view-details-link"><i class="fa fa-link"></i> See details</a>
+                                    </div>
+                                </div>
+
+                                <h2><a href="">Sony Smart Air Condtion</a></h2>
+
+                                <div class="product-carousel-price">
+                                    <ins>$1200.00</ins>
+                                    <del>$1355.00</del>
+                                </div>
+                            </div>
+                            <div class="single-product">
+                                <div class="product-f-image">
+                                    <img src="/static/media/product-6.jpg" alt="">
+                                    <div class="product-hover">
+                                        <a href="" class="add-to-cart-link"><i class="fa fa-shopping-cart"></i> Add to cart</a>
+                                        <a href="" class="view-details-link"><i class="fa fa-link"></i> See details</a>
+                                    </div>
+                                </div>
+
+                                <h2><a href="">Samsung gallaxy note 4</a></h2>
+
+                                <div class="product-carousel-price">
+                                    <ins>$400.00</ins>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+            {% endif %}
         </div>
     </div>
-    
+</div>
 
-{% endblock %}
 
-{% block extrajs%}
+{% endblock %} {% block extrajs%}
 <script src="{% static 'js/lightgallery.js' %}"></script>
 <script src="{% static 'js/lg-thumbnail.js' %}"></script>
 <script src="{% static 'js/lg-fullscreen.js' %}"></script>
@@ -209,5 +203,4 @@
     $(document).ready(function() {
         $("#product-gallery").lightGallery({ thumbnail:true });        
     });
-</script>
-{% endblock %}
+</script> {% endblock %}

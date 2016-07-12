@@ -6,7 +6,7 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>PAMPERO Industrial - ZONDA ARGENTINA</title>
+        <title>{{ empresa }}</title>
 
         <!-- Google Fonts -->
         <link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,200,300,700,600' rel='stylesheet' type='text/css'>
@@ -24,6 +24,16 @@
         <link rel="stylesheet" href="{% static 'css/style.css' %}">
         <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
         
+        <!-- Google Analytics -->
+        <script>
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+            ga('create', 'UA-80641706-1', 'auto');
+            ga('send', 'pageview');
+        </script>
         {% block extracss%} {% endblock %}
         
     </head>
@@ -76,7 +86,7 @@
                         <div class="logo">
                             <h1><a href="/">
                             {% for word in empresa.split %}
-                                {% cycle '' '<span>' %} {{ word }} {% cycle '' '</span>' %}
+                                {% cycle '' '<span>' %}{{ word }}{% cycle '' '</span>' %}
                             {% endfor %}
                             </a></h1>
                         </div>
@@ -123,7 +133,10 @@
                 <div class="row">
                     <div class="col-md-3 col-sm-6">
                         <div class="footer-about-us">
-                            <h2>e<span>Electronics</span></h2>
+                            <h2>{% for word in empresa.split %}
+                                    {% cycle '' '<span>' %} {{ word }} {% cycle '' '</span>' %}
+                                {% endfor %}
+                            </h2>
                             <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Perferendis sunt id doloribus vero quam laborum quas alias dolores blanditiis iusto consequatur, modi aliquid eveniet eligendi iure eaque ipsam iste, pariatur omnis sint! Suscipit, debitis, quisquam. Laborum commodi veritatis magni at?</p>
                             <div class="footer-social">
                                 <a href="#" target="_blank"><i class="fa fa-facebook"></i></a>
@@ -181,7 +194,7 @@
                 <div class="row">
                     <div class="col-md-8">
                         <div class="copyright">
-                            <p>&copy; 2016 Pampero Industrial.  {% trans "Todos los derechos reservados" %}.</p>
+                            <p>&copy; 2016 {{ empresa }}.  {% trans "Todos los derechos reservados" %}.</p>
                         </div>
                     </div>
                     

@@ -381,7 +381,7 @@ body {
     top: 32%;
 }
 .single-product:hover .product-hover a.view-details-link {
-    bottom: 32%;
+    bottom: 40%;
 }
 .single-product:hover .product-hover:after {
     left: 0

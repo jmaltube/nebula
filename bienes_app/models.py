@@ -494,7 +494,11 @@ class Pedido(models.Model):
     def get_precio_total(self):   
         total = 0
         for pedidoybien in self.pedidoybien_set.all():
-            total += self.cliente.lista.get_bienes(search_bien_id=pedidoybien.bien.id, cliente=self.cliente).costo * pedidoybien.cantidad
+            try:
+                costo = self.cliente.lista.get_bienes(search_bien_id=pedidoybien.bien.id, cliente=self.cliente).costo
+            except:
+                costo = 0
+            total += costo * pedidoybien.cantidad
         return total
 
     def get_cantidad_total(self):
@@ -512,10 +516,10 @@ class Pedido(models.Model):
         self.estado = 'CHK'
             
     def __str__(self):
-        return str(self.cliente)
+        return "{0} #{1}".format(str(self.cliente), self.id)
 
     def __unicode__(self):
-        return str(self.cliente)
+        return "{0} #{1}".format(str(self.cliente), self.id)
     
     class Meta:
         permissions = (("action_pedido", "Ejecutar acciones"),)
@@ -530,11 +534,21 @@ class PedidoYBien(models.Model):
         
     def get_precio(self):
         if self.descuento:
-                dto = 1-(self.descuento/100)
+            dto = 1-(self.descuento/100)
         else:
             dto = 1
-        precio = round(self.pedido.cliente.lista.get_bienes(include_hidden=False, search_bien_id=self.bien.id, cliente=self.pedido.cliente).costo * dto,2)
+        try:
+            costo = self.pedido.cliente.lista.get_bienes(include_hidden=False, search_bien_id=self.bien.id, cliente=self.pedido.cliente).costo
+        except:
+            costo = 0
+        precio = round(costo * dto,2)
         return precio or 0
         
     def subtotal(self):
         return self.get_precio() * self.cantidad
+
+    def __str__(self):
+        return "{0}, bien: {1}, cant: {2}".format(self.pedido, self.bien, self.cantidad)
+
+    def __unicode__(self):
+        return "{0}, bien: {1}, cant: {2}".format(self.pedido, self.bien, self.cantidad)

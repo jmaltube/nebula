@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-06-14 21:49-0300\n"
+"POT-Creation-Date: 2016-07-12 14:40-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,164 +17,194 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: .\site_app\templates\admin\base_site.html:12
-#: .\site_app\templates\base.html:104 .\site_app\templates\base.html.py:138
+#: templates/admin/base_site.html:12 templates/base.html.py:118
+#: templates/base.html:155
 msgid "Inicio"
 msgstr "Home"
 
-#: .\site_app\templates\base.html:37
+#: templates/base.html:47
 msgid "Favoritos"
 msgstr "Favorites"
 
-#: .\site_app\templates\base.html:38 .\site_app\templates\base.html.py:106
-#: .\site_app\templates\base.html:140 .\site_app\templates\pedido.html:11
-msgid "Mi pedido"
-msgstr "My order"
+#: templates/base.html:48 templates/base.html.py:120 templates/base.html:157
+#: templates/pedido.html.py:7
+#, fuzzy
+#| msgid "Mi pedido"
+msgid "Mis pedidos"
+msgstr "My orders"
 
-#: .\site_app\templates\base.html:40
+#: templates/base.html:50
 msgid "Ingreso"
 msgstr "Login"
 
-#: .\site_app\templates\base.html:45
+#: templates/base.html:55
 msgid "(cerrar sesión)"
 msgstr "(log-off)"
 
-#: .\site_app\templates\base.html:54
+#: templates/base.html:64
 msgid "Moneda"
 msgstr "Currency"
 
-#: .\site_app\templates\base.html:83
+#: templates/base.html:97
 msgid "Carro"
 msgstr "Cart"
 
-#: .\site_app\templates\base.html:105 .\site_app\templates\base.html.py:139
-#: .\site_app\templates\vidriera.html:7
+#: templates/base.html:119 templates/base.html.py:156
+#: templates/vidriera.html:7
 msgid "Vidriera"
 msgstr "Showcase"
 
-#: .\site_app\templates\base.html:107 .\site_app\templates\base.html.py:141
+#: templates/base.html:121 templates/base.html.py:158
 msgid "Contacto"
 msgstr "Contact"
 
-#: .\site_app\templates\base.html:136
+#: templates/base.html:153
 msgid "Navegación"
 msgstr "Navigation"
 
-#: .\site_app\templates\base.html:161
+#: templates/base.html:178
 msgid "Novedades!"
 msgstr "Newsletter!"
 
-#: .\site_app\templates\base.html:162
+#: templates/base.html:179
 msgid ""
 "Subscríbase al boletín para recibir las novedades de nuestros productos en "
 "su correo electrónico."
-msgstr "Subscribe to our newsletter to stay on top of new products and great deals!"
+msgstr ""
+"Subscribe to our newsletter to stay on top of new products and great deals!"
 
-#: .\site_app\templates\base.html:180
+#: templates/base.html:197
 msgid "Todos los derechos reservados"
 msgstr "All rights reserved"
 
-#: .\site_app\templates\catalogo.html:34
+#: templates/catalogo.html:34
 msgid "Clasificador"
 msgstr "Clasifiers"
 
-#: .\site_app\templates\catalogo.html:59 .\site_app\templates\pedido.html:26
+#: templates/catalogo.html:59
 #, python-format
 msgid " *Precio con %(impuesto)s incluido "
 msgstr "*Prices with %(impuesto)s included "
 
-#: .\site_app\templates\catalogo.html:68 .\site_app\templates\vidriera.html:63
+#: templates/catalogo.html:68 templates/index.html.py:137
+#: templates/vidriera.html:63
 msgid "Agregar"
 msgstr "Add"
 
-#: .\site_app\templates\catalogo.html:72
+#: templates/catalogo.html:72
 msgid "Código"
 msgstr "Code"
 
-#: .\site_app\templates\catalogo.html:72
+#: templates/catalogo.html:72
 msgid "Etiquetas"
 msgstr "Tags"
 
-#: .\site_app\templates\login.html:10
+#: templates/index.html:130
+#, fuzzy
+#| msgid "Mi pedido"
+msgid "¡Lo mas pedido!"
+msgstr "Top picks!"
+
+#: templates/index.html:138
+msgid "Ver detalles"
+msgstr "View details"
+
+#: templates/index.html:161
+msgid "Marcas"
+msgstr "Brands"
+
+#: templates/login.html:10
 msgid "¡Bienvenido!"
 msgstr "Welcome!"
 
-#: .\site_app\templates\login.html:21 .\site_app\views.py:240
+#: templates/login.html:21 views.py:220
 msgid "usuario"
 msgstr "user"
 
-#: .\site_app\templates\login.html:25 .\site_app\views.py:241
+#: templates/login.html:25 views.py:221
 msgid "contraseña"
 msgstr "password"
 
-#: .\site_app\templates\login.html:29
+#: templates/login.html:29
 msgid "Entrar"
 msgstr "Login"
 
-#: .\site_app\templates\pedido.html:32
+#: templates/pedido.html:32
+msgid "Estado del pedido"
+msgstr "Status of your order"
+
+#: templates/pedido.html:38
 msgid "Producto"
 msgstr "Product"
 
-#: .\site_app\templates\pedido.html:33
+#: templates/pedido.html:39
 msgid "Codigo"
 msgstr "Code"
 
-#: .\site_app\templates\pedido.html:34
+#: templates/pedido.html:40
 msgid "Precio"
 msgstr "Price"
 
-#: .\site_app\templates\pedido.html:35
+#: templates/pedido.html:41
 msgid "Cantidad"
 msgstr "Quantity"
 
-#: .\site_app\templates\pedido.html:36 .\site_app\templates\pedido.html:96
+#: templates/pedido.html:42 templates/pedido.html.py:100
 msgid "Total"
 msgstr "Total"
 
-#: .\site_app\templates\pedido.html:79
+#: templates/pedido.html:83
 #, fuzzy
 #| msgid "Mi pedido"
 msgid "Confirmar pedido"
 msgstr "Confirm order"
 
-#: .\site_app\templates\pedido.html:87
+#: templates/pedido.html:91
 msgid "Totales"
 msgstr "Totals"
 
-#: .\site_app\templates\pedido.html:92
+#: templates/pedido.html:92
+#, fuzzy, python-format
+#| msgid " *Precio con %(impuesto)s incluido "
+msgid " Precio con %(impuesto)s incluido "
+msgstr "*Prices with %(impuesto)s included "
+
+#: templates/pedido.html:96
 msgid "Subtotal"
 msgstr "Subtotal"
 
-#: .\site_app\templates\vidriera.html:36
+#: templates/vidriera.html:36
 msgid "Buscar"
 msgstr "Search"
 
-#: .\site_app\templates\vidriera.html:85
+#: templates/vidriera.html:85
 #, python-format
 msgid " Página %(page)s de %(pages)s "
 msgstr "Page %(page)s of %(pages)s"
 
-#: .\site_app\views.py:63
+#: views.py:62
 msgid "No se encontraron resultados"
 msgstr "No results found"
 
-#: .\site_app\views.py:65
+#: views.py:65
 msgid "Sin lista de precios asociada"
 msgstr "No list of prices found for your user"
 
-#: .\site_app\views.py:126
+#: views.py:119
 msgid "Usuario y/o contraseña incorrectos"
 msgstr "User and/or password are incorrect"
 
-#: .\site_app\views.py:184
-msgid "Nuevo pedido de: "
-msgstr "New order from: "
+#: views.py:181
+#, fuzzy, python-brace-format
+#| msgid "Nuevo pedido de: "
+msgid "Nuevo pedido de: {0} "
+msgstr "New order from: {0} "
 
-#: .\site_app\views.py:246
+#: views.py:226
 msgid "Por nombre o descripción"
 msgstr "By name or description"
 
-#: .\site_app\views.py:247
+#: views.py:227
 #, fuzzy
 #| msgid "Clasificador"
 msgid "Clasificadores:"
