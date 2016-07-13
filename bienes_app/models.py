@@ -512,6 +512,9 @@ class Pedido(models.Model):
     def abierto(self):
         return True if self.estado == 'ABR' else False
     
+    def cerrado (self):
+        return True if self.estado in ('COM','CAN') else False
+
     def checkout(self):
         self.estado = 'CHK'
             

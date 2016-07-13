@@ -17,6 +17,8 @@ from pdfkit import from_string, configuration
 from os import remove 
 from django.conf import settings
 import datetime
+from django.db.models import Q
+
 #--------------------PRIVATE--------------------#                         
 
 @transaction.atomic
@@ -250,17 +252,17 @@ def reporte_lista(request, lista_id=None, format='HTML'):
         
 @login_required(login_url='/admin/login/')
 def reporte_pedido_pendientes(request, ids=None, format='HTML'):
-#    try:
-    pedidos = Pedido.objects.filter(id__in=ids.split(',')) #.select_related('cliente')
-    context = {'title':'Lista de pedidos con pendientes','pedidos':pedidos,'opts':Pedido._meta}
-    if format == "HTML":
-        pdf_url = reverse('reporte-pedido-pendientes', kwargs={'format':'PDF','ids':ids})
-        context['pdf_url'] = pdf_url
-        return render(request, 'reports/pedido_pendientes.html',context=context)
-    elif format == "PDF":            
-        file_name = "Pedido_pendientes_{0}".format(str(datetime.date.today()))
-        return generate_pdf(request,'reports/pedido_pendientes.html',context, file_name )
-#    except Exception as e:
-#        return HttpResponseServerError()  
-#        return HttpResponseRedirect('/admin/bienes_app/pedido/')
+    try:
+        pedidos = Pedido.objects.filter(id__in=ids.split(',')).exclude(estado__in=['CAN', 'COM']).filter( pedidoybien__entregado=False).distinct()
+        context = {'title':'Lista de pedidos con pendientes','pedidos':pedidos,'opts':Pedido._meta}
+
+        if format == "HTML":
+            pdf_url = reverse('reporte-pedido-pendientes', kwargs={'format':'PDF','ids':ids})
+            context['pdf_url'] = pdf_url
+            return render(request, 'reports/pedido_pendientes.html',context=context)
+        elif format == "PDF":            
+            file_name = "Pedido_pendientes_{0}".format(str(datetime.date.today()))
+            return generate_pdf(request,'reports/pedido_pendientes.html',context, file_name )
+    except Exception as e:
+        return HttpResponseRedirect('/admin/bienes_app/pedido/')
               

@@ -7,11 +7,11 @@
         <h3>{{ cliente.grouper }}</h3>
         <ul>
         {% for pedido in cliente.list %}
-            {% if not pedido.pendientes %}
+            {% if not pedido.cerrado %}
                 <li> <a> pedido nro: <strong>{{ pedido.id }}</strong> en estado <strong>{{ pedido.get_estado_display }}</strong></a></li>
                 {% for item in pedido.pedidoybien_set.all %}
                     {% if not item.entregado %}
-                        <li style="margin-left: 15px;"><strong>{{ item.bien.denominacion }}:</strong> <a> cant: <strong>{{ item.cantidad }}</strong></a> <a> precio venta: <strong>{{ item.get_precio }}</strong> {{ item.bien.moneda}}</a></li>
+                        <li style="margin-left: 15px;"><strong>{{ item.bien.denominacion }}:</strong> <a> cant: <strong>{{ item.cantidad }}</strong></a> <a> precio x item: <strong>{{ item.get_precio }}</strong> {{ item.bien.moneda}}</a></li>
                     {% endif %}
                 {% endfor %}
                 <br>
