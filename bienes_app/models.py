@@ -5,7 +5,6 @@ from django.core.validators import MaxValueValidator, MinValueValidator, RegexVa
 from django.db import models
 from django.db.models import Q
 from django.contrib.auth.models import User
-from site_app.models import Moneda
 from django.core.signing import Signer
 import operator
 
@@ -28,6 +27,22 @@ TipoFactura = [('FTA','Factura A'), ('FTB','Factura B'),('FTA','Factura A'),
         ('NDB','Nota de débito B'),('NDC','Nota de débito C'),('NDE','Nota de débito E'),
         ('NDM','Nota de débito M')                                               
         ]   
+
+Moneda = [('ARS','Peso Argentino'),('USD','Dólar'),('EUR','Euro'), ('BRL', 'Real')]
+
+
+class Moneda(models.Model):
+    moneda = models.CharField(choices=Moneda, max_length=3, unique=True)
+    cotizacion = models.DecimalField(max_digits=5, decimal_places=2)
+    visible = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return u"%s (%s)" %(self.moneda, self.cotizacion)
+    
+    def __unicode__(self):
+        return u"%s (%s)" %(self.moneda, self.cotizacion)
+    
+
 
 class Abastecimiento(models.Model):
     denominacion = models.CharField(max_length=50) 
@@ -150,7 +165,7 @@ class Proveedor(models.Model):
         
     class Meta:
         ordering = ["razon_social", "nombre_fantasia"]
-        verbose_name_plural = "Proveedores"        
+        verbose_name_plural = " Proveedores"        
 
 class Atributo(models.Model):
     titulo = models.CharField(max_length=50)    
@@ -216,7 +231,7 @@ class Bien(models.Model):
         
     class Meta:
         ordering = ["codigo", "denominacion"]
-        verbose_name_plural = "Bienes"
+        verbose_name_plural = " Bienes"
         permissions = (("action_bien", "Ejecutar acciones"),)
 
 class BienYAtributo(models.Model):
@@ -283,7 +298,7 @@ class Lista(models.Model):
     
     class Meta:
         ordering = ["tipo", "nombre"]
-        verbose_name_plural = "Listas"
+        verbose_name_plural = " Listas"
         permissions = (("action_lista", "Ejecutar acciones"),)
 
     
@@ -457,6 +472,9 @@ class Cliente(models.Model):
     def __unicode__(self):
         return self.razon_social
 
+    class Meta:
+        verbose_name_plural = " Clientes"
+
 class ClienteYClasificador(models.Model):
     clasificador = models.ForeignKey(Clasificador, on_delete=models.CASCADE)
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)        
@@ -525,6 +543,7 @@ class Pedido(models.Model):
         return "{0} #{1}".format(str(self.cliente), self.id)
     
     class Meta:
+        verbose_name_plural = " Pedidos"
         permissions = (("action_pedido", "Ejecutar acciones"),)
                 
 class PedidoYBien(models.Model):

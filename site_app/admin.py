@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User, Permission
-from site_app.models import Moneda
 
 #from site_app.models import Cliente
 
@@ -21,4 +20,3 @@ from site_app.models import Moneda
 #admin.site.register(User, ClienteAdmin)
 #admin.site.register(Cliente)
 admin.site.register(Permission)
-admin.site.register(Moneda)

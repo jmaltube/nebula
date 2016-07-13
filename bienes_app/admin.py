@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.contrib import admin
 from bienes_app.models import (Bien, Proveedor, Compra, Lista, ListaYBien, ListaYClasificador, Clasificador, 
-Marca, Abastecimiento, Rubro, Contacto, Cliente, Pedido, PedidoYBien, ClienteYBien, ClienteYClasificador, Expreso, BienYAtributo, Atributo, Impuesto)
+Marca, Abastecimiento, Rubro, Contacto, Cliente, Pedido, PedidoYBien, ClienteYBien, ClienteYClasificador, Expreso, BienYAtributo, Atributo, Impuesto, Moneda)
 from dal import autocomplete
 from bienes_app.views import duplicar_bien, duplicar_lista, igualar_costo_proveedor
 from django.db import transaction
@@ -334,3 +334,4 @@ admin.site.register(Abastecimiento)
 admin.site.register(Contacto,ContactoAdmin)
 admin.site.register(Pedido, PedidoAdmin)
 admin.site.register(Impuesto)
+admin.site.register(Moneda)
