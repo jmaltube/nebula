@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.template import loader
 from django import forms
-from bienes_app.models import Lista, Pedido, Bien, PedidoYBien, Clasificador, BienYAtributo
+from bienes_app import models 
 from django.core import serializers
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.exceptions import ValidationError, MultipleObjectsReturned, ObjectDoesNotExist
@@ -23,7 +23,7 @@ def index(request):
         cliente = request.user.cliente if request.user.is_authenticated() else None
         bienes = lista.get_bienes(include_hidden=False, cliente=cliente)
         ids = [bien.id for bien in bienes]  
-        top_bienes = Bien.objects.filter(pk__in=ids, visible=True).annotate(rank=Count('pedido')).order_by('-rank')[:10]
+        top_bienes = models.Bien.objects.filter(pk__in=ids, visible=True).annotate(rank=Count('pedido')).order_by('-rank')[:10]
         context['top_bienes'] = top_bienes 
     except Exception as e:
         pass
@@ -40,9 +40,9 @@ def vidriera(request):
 
     try:
         search_string = request.session['search_string']                
-        clasificador = Clasificador.objects.get(id=request.session['search_clasificador'])
+        clasificador = models.Clasificador.objects.get(id=request.session['search_clasificador'])
     except:
-        clasificador = Clasificador.objects.none()
+        clasificador = models.Clasificador.objects.none()
         search_string = ""
     
     if request.method == 'POST':
@@ -97,14 +97,14 @@ def catalogo(request):
             bien = lista.get_bienes(include_hidden=False, search_bien_id=bien_id, cliente=cliente)
             context['bien'] = bien
             context['impuesto'] = lista.impuesto
-            atributos = BienYAtributo.objects.filter(bien__id=bien.id)
+            atributos = models.BienYAtributo.objects.filter(bien__id=bien.id)
             context['atributos'] = atributos
     return render(request, 'catalogo.html', context)
 
 def pedido(request):
     if request.user.is_authenticated():
         context = get_base_context(request)
-        context['pedidos'] = Pedido.objects.filter(cliente=request.user.cliente).exclude(estado__in=('COM', 'CAN')).order_by('id')
+        context['pedidos'] = models.Pedido.objects.filter(cliente=request.user.cliente).order_by('id')[:10]
         context['impuesto'] = get_lista(request).impuesto
         return render(request, 'pedido.html',context)
     else:
@@ -142,13 +142,13 @@ def add_to_cart(request):
         next_url = request.POST.get('next_url')
         pedido = get_pedido(request)
         try:
-            bien = Bien.objects.get(id=bien_id)
-            carrito = PedidoYBien.objects.get(pedido=pedido,bien=bien)
-            carrito.cantidad = cantidad
-        except Bien.DoesNotExist:
+            bien = models.Bien.objects.get(id=bien_id)
+            carrito = models.PedidoYBien.objects.get(pedido=pedido,bien=bien)
+            carrito.cantidad_solicitada = cantidad
+        except models.Bien.DoesNotExist:
             pass    
-        except PedidoYBien.DoesNotExist:
-            carrito = PedidoYBien(pedido=pedido, bien=bien, cantidad=cantidad)    
+        except models.PedidoYBien.DoesNotExist:
+            carrito = models.PedidoYBien(pedido=pedido, bien=bien, cantidad_solicitada=cantidad)    
         carrito.save()
         return HttpResponseRedirect(next_url)
     else:
@@ -165,12 +165,12 @@ def remove_from_cart(request):
             bien_id = int(signer.unsign(signed_id),0)
             
             try:
-                bien = Bien.objects.get(id=bien_id)
-                carrito = PedidoYBien.objects.get(pedido=pedido,bien=bien)
+                bien = models.Bien.objects.get(id=bien_id)
+                carrito = models.PedidoYBien.objects.get(pedido=pedido,bien=bien)
                 carrito.delete()
-            except Bien.DoesNotExist:
+            except models.Bien.DoesNotExist:
                 pass    
-            except PedidoYBien.DoesNotExist:
+            except models.PedidoYBien.DoesNotExist:
                 pass
         return HttpResponseRedirect(next_url)    
     else:
@@ -204,17 +204,16 @@ def get_lista(request):
     try:
         if not request.user.is_authenticated():
             raise ObjectDoesNotExist
-        lista = Lista.objects.get(id=request.user.cliente.lista.id)
+        return models.Lista.objects.get(id=request.user.cliente.lista.id)
     except ObjectDoesNotExist:
-        lista = Lista.objects.filter(tipo__iexact = 'VRA').last()
-    return lista    
+        return  models.Lista.objects.filter(tipo__iexact = 'VRA').last()
 
 def get_pedido(request):
     try:
-        pedido = Pedido.objects.filter(cliente=request.user.cliente, estado__iexact='ABR')[0]       
+        pedido = models.Pedido.objects.filter(cliente=request.user.cliente, confirmado_x_cliente=False)[0]       
     except:
         try:
-            pedido = Pedido(cliente=request.user.cliente)
+            pedido = models.Pedido(cliente=request.user.cliente, confirmado_x_cliente = False, validado_x_admin=True)
             pedido.save()
         except:
             pedido = None
@@ -229,7 +228,7 @@ class SearchForm(forms.Form):
 
     #categoria_formfield = forms.ModelChoiceField(widget=forms.Select(attrs={'size':'13', 'onchange':'this.form.action=this.form.submit()'}), queryset=sitio_categoria.objects.none())
     search_string = forms.CharField(widget=forms.TextInput(attrs={'placeholder': ugettext_lazy('Por nombre o descripción')}), max_length=20, required=False)
-    clasificador = forms.ModelChoiceField(empty_label=ugettext_lazy("Clasificadores:"),queryset=Clasificador.objects.all(), required=False)
+    clasificador = forms.ModelChoiceField(empty_label=ugettext_lazy("Clasificadores:"),queryset=models.Clasificador.objects.all(), required=False)
     
     #def clean(self):
     #    cleaned_data = super(SearchForm, self).clean()

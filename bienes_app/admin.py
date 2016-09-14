@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 from django.contrib import admin
-from bienes_app.models import (Bien, Proveedor, Compra, Lista, ListaYBien, ListaYClasificador, Clasificador, 
-Marca, Abastecimiento, Rubro, Contacto, Cliente, Pedido, PedidoYBien, ClienteYBien, ClienteYClasificador, Expreso, BienYAtributo, Atributo, Impuesto, Moneda)
-from dal import autocomplete
+from bienes_app import models
 from bienes_app.views import duplicar_bien, duplicar_lista, igualar_costo_proveedor
 from django.db import transaction
-from django import forms 
 #from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
@@ -13,120 +10,12 @@ from django.utils.html import format_html, format_html_join, mark_safe
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 from bienes_app.utils import ItemsPendientesListFilter
-
-#--------------------FORMS--------------------#
-class ListaYBienForm(forms.ModelForm):
-    class Meta:
-        model = ListaYBien
-        fields = ('__all__')
-        widgets = {
-            'bien': autocomplete.ModelSelect2(url='bien-autocomplete'),            
-      
-        }
-                
-class ListaYClasificadorForm(forms.ModelForm):
-    class Meta:
-        model = ListaYClasificador
-        fields = ('__all__')        
-        widgets = {
-            'clasificador': autocomplete.ModelSelect2(url='clasificador-autocomplete'),                  
-        }
-        
-
-class ClienteYBienForm(forms.ModelForm):
-    class Meta:
-        model = ClienteYBien
-        fields = ('__all__')
-        widgets = {
-            'bien': autocomplete.ModelSelect2(url='bien-autocomplete'),            
-      
-        }
-
-class ClienteYClasificadorForm(forms.ModelForm):
-    class Meta:
-        model = ClienteYClasificador
-        fields = ('__all__')        
-        widgets = {
-            'clasificador': autocomplete.ModelSelect2(url='clasificador-autocomplete'),                  
-        }
-
-class ClienteForm(forms.ModelForm):
-    class Meta:
-        model = Cliente
-        fields = ('__all__')
-        widgets = {
-            'corredor': autocomplete.ModelSelect2(url='corredor-autocomplete'),                  
-        }
-
-class CompraForm(forms.ModelForm):
-    class Meta:
-        model = Compra
-        fields = ('__all__')
-        widgets = {
-            'proveedor': autocomplete.ModelSelect2(url='proveedor-autocomplete'),            
-      
-        }
-
-class PedidoYBienForm(forms.ModelForm):
-    class Meta:
-        model = PedidoYBien
-        fields = ('__all__')
-        widgets = {
-            'bien': autocomplete.ModelSelect2(url='bien-autocomplete'),            
-      
-        }
-        
-#--------------------INLINES--------------------#         
-class ListaYBienInLine(admin.TabularInline):
-    model = ListaYBien
-    form = ListaYBienForm
-    extra = 1    
-    verbose_name = "Bien"
-    verbose_name_plural = "Bienes"                
-
-
-class ListaYClasificadorInLine(admin.TabularInline):
-    model = ListaYClasificador
-    form = ListaYClasificadorForm
-    extra = 1    
-    verbose_name = "Clasificador"
-    verbose_name_plural = "Clasificadores"                
-
-
-class CompraInLine(admin.StackedInline):
-    model = Compra
-    form = CompraForm
-    extra = 0
-    verbose_name = "Opcion de compra"
-    verbose_name_plural = "Opciones de compras"
-
-class ClienteYBienInLine(admin.TabularInline):
-    model = ClienteYBien
-    form = ClienteYBienForm
-    extra = 1    
-    verbose_name = "Descuento especial por bien"
-    verbose_name_plural = "Descuentos especiales por bienes"                
-
-class BienYAtributoInLine(admin.TabularInline):
-    model = BienYAtributo 
-    extra = 0    
-    verbose_name = "Atributo"
-    verbose_name_plural = "Atributos"
-
-class ClienteYClasificadorInLine(admin.TabularInline):
-    model = ClienteYClasificador
-    form = ClienteYClasificadorForm
-    extra = 1
-    verbose_name = "Descuento especial por clasificador"
-    verbose_name_plural = "Descuentos especiales por clasificadores"
-    #can_delete = False
-
-class PedidoYBienInLine(admin.TabularInline):   
-    model = PedidoYBien
-    form = PedidoYBienForm
-    extra = 1
-    verbose_name_plural = 'Detalle del pedido'
-
+from bienes_app import forms as admin_forms
+from django.conf import settings
+from django.utils.translation import ugettext_lazy, ugettext as _
+from django.db.models import F
+from django.db import models as db_models
+from django.db.models.functions import Coalesce  
 #--------------------ACTIONS--------------------#             
 def duplicar_bien_action(modeladmin, request, queryset):
     if request.user.has_perm('bienes_app.action_bien'):    
@@ -176,9 +65,16 @@ def reporte_pedido_pendientes_action(modeladmin, request, queryset):
     else:
         return HttpResponseRedirect("/admin/bienes_app/pedido/")
 
+def generar_proforma_action(modeladmin, request, queryset): 
+    if request.user.has_perm('bienes_app.action_pedido'):
+        selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
+        return HttpResponseRedirect(reverse('generar-proforma', kwargs={'pedido_ids':",".join(selected)}))
+    else:
+        return HttpResponseRedirect("/admin/bienes_app/pedido/")
+
 #--------------------ADMINS--------------------#             
 class ListaAdmin(admin.ModelAdmin):   
-    inlines = (ListaYClasificadorInLine,ListaYBienInLine)
+    inlines = (admin_forms.ListaYClasificadorInLine,admin_forms.ListaYBienInLine)
     list_display = ('nombre','tipo', 'moneda', 'reporte')
     list_filter = ('tipo',)
     ordering = ('nombre',)
@@ -212,7 +108,7 @@ class BienAdmin(admin.ModelAdmin):
     )
     
     
-    inlines = (BienYAtributoInLine, CompraInLine,)
+    inlines = (admin_forms.BienYAtributoInLine, admin_forms.CompraInLine,)
     list_display = ('codigo','denominacion','clasificador','marca','costo','moneda',costo_base_proveedor_colored)
     list_filter = ('clasificador', 'proveedor', 'marca')
     list_editable = ('costo',)
@@ -245,7 +141,7 @@ class ProveedorAdmin(admin.ModelAdmin):
     
     readonly_fields = ('get_fecha_alta',)
     fieldsets = (
-        ('Datos generales',{'fields':('razon_social','nombre_fantasia','get_fecha_alta','telefono','fax','website','email','tipo','direccion','codigo_postal','partido','localidad','provincia','pais','contactos')}),        
+        ('Datos generales',{'fields':('user','razon_social','nombre_fantasia','get_fecha_alta','telefono','fax','website','email','tipo','direccion','codigo_postal','partido','localidad','provincia','pais','contactos')}),        
         ('Datos comerciales',{'classes':('collapse',),'fields':('cuit','condicion_comercial','forma_entrega','iva','tipo_factura','corredor','indirecto','agente_perc_iibb','agente_perc_iigg','agente_perc_iva','agente_perc_ss')})
     )  
     #filter_horizontal = ('contactos')
@@ -256,34 +152,160 @@ class ClienteAdmin(admin.ModelAdmin):
     get_fecha_alta.short_description = 'Fecha de alta'
     
     readonly_fields = ('get_fecha_alta',)
-    inlines = (ClienteYClasificadorInLine, ClienteYBienInLine)    
+    inlines = (admin_forms.ClienteYClasificadorInLine, admin_forms.ClienteYBienInLine)    
     #filter_horizontal = ('contactos')    
     list_display = ('razon_social', 'nombre_fantasia', 'habilitado')
     list_filter = ('lista',)
     ordering = ('nombre_fantasia',)
     search_fields = ('nombre_fantasia', 'razon_social', 'direccion', 'cuit', 'telefono', 'email', 'localidad', 'provincia' )    
-    form = ClienteForm
+    form = admin_forms.ClienteForm
     fieldsets = (
         ('Datos generales',{'fields':('user','lista','razon_social','nombre_fantasia','rubro','get_fecha_alta','habilitado','expreso','corredor','telefono','email','website','direccion','codigo_postal','partido','localidad','provincia','pais','contactos')}),        
         ('Datos comerciales',{'classes':('collapse',),'fields':('cuit','comprobante_cuit','condicion_comercial','informe_economico','limite_credito','iva','forma_entrega','alerta','mayorista','tipo_factura','agente_perc_iibb','agente_perc_iigg','agente_perc_iva','agente_perc_ss', 'jurisdiccion_iibb')})
     )
     
-    
+    def get_readonly_fields(self, request, obj=None):
+        if not request.user.is_superuser:
+            return self.readonly_fields + ('habilitado',)
+        return self.readonly_fields
+
+    def get_form(self, request, obj=None, **kwargs): #Para que el pedido esté habilitado x defecto si el user es un admin
+        form = super(ClienteAdmin, self).get_form(request, obj, **kwargs)
+        if request.user.is_superuser:
+            form.base_fields['habilitado'].initial = True
+        return form
+
     class Media:
         css = { "all" : ("css/hide_admin_original.css",) }
               
-class PedidoAdmin(admin.ModelAdmin):   
-    inlines = (PedidoYBienInLine,)
-    list_display = ('id','cliente','fecha_actualizacion','fecha_prevista_entrega','estado', 'pendientes')
-    list_filter = (ItemsPendientesListFilter, 'estado', 'cliente', 'vendedor', )
-    list_editable = ('estado',)
-    ordering = ('cliente', 'fecha_actualizacion')
+class PedidoAdmin(admin.ModelAdmin):
+
+    def pendientes_popup(self):
+        if self.pendientes():
+            return format_html('''
+            <div id="popup{0}" class="popup">
+                <span class="button b-close"><span>x</span></span>
+                <div class="content{0}" style="height: auto; width: auto;"></div>
+            </div>        
+            <img src="{2}admin/img/icon-no.svg" alt="XXX" title="Click para mas info" id="pop{0}"/>
+            <script>
+                $(function(){{
+                    $('#pop{0}').click(function(){{
+                        $('#popup{0}').bPopup({{
+                            contentContainer:'.content{0}',
+                            loadUrl:'{1}'
+                        }});
+                    }});
+                }});
+            </script>
+            '''
+            ,self.pk,reverse('popup-pedidos-pendientes', kwargs={'pedido_id':self.pk}),settings.STATIC_URL)   
+        else:
+            return format_html('<img src="{}admin/img/icon-yes.svg" alt="OK" />',settings.STATIC_URL)
+
+    inlines = (admin_forms.PedidoYBienInLine,)
+    list_display = ('id','cliente','fecha_creacion','fecha_actualizacion','fecha_prevista_entrega','presupuesto',pendientes_popup )#'estado', 'pendientes')
+    list_filter = (  'cliente', 'vendedor', ) #'estado',ItemsPendientesListFilter
+    exclude = ('confirmado_x_cliente',)
+    ordering = ('-fecha_creacion','cliente', 'fecha_actualizacion')
     search_fields = ('cliente', 'vendedor', 'pedido__bien')    
     actions = (reporte_pedido_pendientes_action,)
     reporte_pedido_pendientes_action.short_description = "Reporte de pedidos pendientes"
+    form = admin_forms.PedidoForm
+    actions = (generar_proforma_action,)
+    readonly_fields = ('fecha_creacion','estado_pendientes','precio_total', 'costo_total', 'utilidad')    
+    generar_proforma_action.short_description = _("Generar proforma")
+
+    fieldsets = (
+        (_('DATOS ENCABEZADO'),{'fields':('cliente', 'estado_pendientes', 'precio_total', 'costo_total', 'utilidad')}),        
+        (_('Mas opciones'),{'classes':('collapse',),'fields':('fecha_creacion','fecha_prevista_entrega', 'presupuesto', 'validado_x_admin', 'vendedor', 'observaciones')})
+    )
+
+    def estado_pendientes(self, obj):
+        boolean = "no" if obj.pendientes() else "yes"
+        return format_html('<img src="{}admin/img/icon-{}.svg" alt="False" />',settings.STATIC_URL, boolean) 
+    estado_pendientes.short_description = 'Estado pendientes'
+
+    def precio_total(self, obj):
+        return obj.get_precio_total()
+
+    def costo_total(self, obj):
+        return obj.get_costo_total()
+
+    def utilidad(self, obj):
+        return "%"
+
+    def get_readonly_fields(self, request, obj=None):
+        if not request.user.is_superuser:
+            return self.readonly_fields + ('validado_x_admin',)
+        return self.readonly_fields
+
+    def get_queryset(self, request): #Para filtrar el query del admin
+        qs = super(PedidoAdmin, self).get_queryset(request).filter(confirmado_x_cliente=True)
+        if request.user.is_superuser:
+            return qs
+        else:
+            try:
+                return qs.filter(cliente__corredor__user=request.user)
+            except Exception as e:
+                print(e)
+                return qs.none()
     
+    def get_form(self, request, obj=None, **kwargs): #Para que el pedido esté validado x defecto si el user es un admin
+        form = super(PedidoAdmin, self).get_form(request, obj, **kwargs)
+        try:
+            if request.user.is_superuser:
+                form.base_fields['validado_x_admin'].initial = True
+            vendedor = models.Proveedor.objects.get(user=request.user) 
+            form.base_fields['vendedor'].initial = vendedor
+        except:
+            pass
+        return form
+    
+    def has_delete_permission(self, request, obj=None):
+        perm = super(PedidoAdmin, self).has_delete_permission(request, obj)
+        if obj and obj.proforma_set.filter(cancelada=False):        
+            return False
+        return perm
+
+
+    def get_actions(self, request): #Disable delete
+        actions = super(PedidoAdmin, self).get_actions(request)
+        del actions['delete_selected']
+        return actions
+
     class Media:
-        css = { "all" : ("css/hide_admin_original.css",) }
+        css = { "all" : ("css/hide_admin_original.css", 'css/bpopup.style.min.css')}
+        js = ('js/jquery.bpopup.min.js','js/ajax_pedido.js')
+
+class PedidoItemsAdmin(admin.ModelAdmin):
+    def cant_pendiente(obj):
+        return obj.cantidad_pendiente()
+
+    def precio_total(obj):        
+        return obj.subtotal_pendiente()
+    
+    def fecha_prevista_entrega(obj):
+        return obj.pedido.fecha_prevista_entrega
+
+    readonly_fields = (cant_pendiente, precio_total, fecha_prevista_entrega)
+    list_display = ('pedido', 'bien', cant_pendiente,precio_total,'observaciones', fecha_prevista_entrega)
+    list_filter = ('bien__clasificador', 'bien__clasificador__rubro__denominacion')#ItemsPendientesListFilter,)
+    search_fields = ('pedido__cliente__razon_social','bien__clasificador__denominacion','bien__denominacion', 'bien__codigo')
+    #ordering = (fecha_prevista_entrega)
+    #list_editable = ('costo','dto1', 'dto2', 'dto3')
+    #modificar_costo_proveedor_action.short_description = "Modificar costo."
+    
+    def get_queryset(self, request): #Para filtrar el query del admin
+        try:
+            qs = super(PedidoItemsAdmin, self).get_queryset(request)
+            if request.user.is_superuser:
+                return qs.annotate(cantidad=Coalesce(db_models.Sum('proformaybien__cantidad'),0)).filter(cantidad__lt=F('cantidad_solicitada'),pedido__confirmado_x_cliente=True, pedido__presupuesto=False )
+            else:
+                raise Exception
+        except Exception as e:
+            print(e)
+            return qs.none()
 
 class CompraAdmin(admin.ModelAdmin):
     def get_bien_clasificador(self, obj):
@@ -317,21 +339,80 @@ class ContactoAdmin(admin.ModelAdmin):
     search_fields = ('nombre_apellido','cliente__razon_social','proveedor__razon_social','telefono','celular','email')
     #filter_horizontal = ('bienes')
 
+
+class ProformaAdmin(admin.ModelAdmin):
+    def get_self(self):
+        return self
+    get_self.short_description = _("Proforma")    
+
+    def proforma_cancelada(self):
+        if self.cancelada:
+            return format_html('''
+            <img src="{0}admin/img/icon-no.svg" alt="XXX" title="Proforma CANCELADA" "/>
+            '''
+            ,settings.STATIC_URL)
+        else:
+            return ""
+    proforma_cancelada.short_description = ""
+    
+    list_display = (get_self,'cliente', 'fecha_creacion', 'factura', 'observaciones',proforma_cancelada)
+    list_filter = ('cliente',)
+    search_fields = ('cliente__razon_social', 'factura')
+    inlines = (admin_forms.ProformaYBienInLine,)      
+    readonly_fields = ('autocompletar',)
+    form = admin_forms.ProformaForm
+
+    fieldsets = (
+        (_('DATOS ENCABEZADO'),{'fields':('cliente', 'pedidos', 'autocompletar')}),        
+        (_('Mas opciones'),{'classes':('collapse',),'fields':('factura', 'observaciones', 'cancelada')})
+    )
+
+    #def render_change_form(self, request, context, *args, **kwargs): #Esto es para filtrar el query de un m2m field al iniciar el formulario.
+    #     context['adminform'].form.fields['pedidos'].queryset = models.Pedido.objects.filter(id=39)
+
+    #     return super(ProformaAdmin, self).render_change_form(request, context, *args, **kwargs)
+
+    def autocompletar(self, obj):
+        return format_html('<a id="Autocompletar" class="button">Autocompletar</a>') 
+    autocompletar.short_description = ' '
+
+    def get_readonly_fields(self, request, obj=None):
+        if not request.user.is_superuser:
+            return self.readonly_fields + ('validado_x_admin',)
+        return self.readonly_fields
+
+    def has_delete_permission(self, request, obj=None):
+        perm = super(ProformaAdmin, self).has_delete_permission(request, obj)
+        return False
+
+    def get_actions(self, request): #Disable delete
+        actions = super(ProformaAdmin, self).get_actions(request)
+        del actions['delete_selected']
+        return actions
+
+    #def save_model(self, request, obj, form, change):
+
+    class Media:
+        css = { "all" : ("css/hide_admin_original.css",) }
+        js = ('js/ajax_proforma.js',)
+
 #--------------------REGISTERS--------------------#
 #admin.site.unregister(User)
 #admin.site.register(User, UserClienteAdmin)
-admin.site.register(Cliente, ClienteAdmin)         
-admin.site.register(Bien, BienAdmin)
-admin.site.register(Proveedor, ProveedorAdmin)
-admin.site.register(Rubro)
-admin.site.register(Compra, CompraAdmin)
-admin.site.register(Lista, ListaAdmin)
-admin.site.register(Clasificador,ClasificadorAdmin)
-admin.site.register(Marca)
-admin.site.register(Atributo)
-admin.site.register(Expreso)
-admin.site.register(Abastecimiento)
-admin.site.register(Contacto,ContactoAdmin)
-admin.site.register(Pedido, PedidoAdmin)
-admin.site.register(Impuesto)
-admin.site.register(Moneda)
+admin.site.register(models.Cliente, ClienteAdmin)         
+admin.site.register(models.Bien, BienAdmin)
+admin.site.register(models.Proveedor, ProveedorAdmin)
+admin.site.register(models.Rubro)
+admin.site.register(models.Compra, CompraAdmin)
+admin.site.register(models.Lista, ListaAdmin)
+admin.site.register(models.Clasificador,ClasificadorAdmin)
+admin.site.register(models.Marca)
+admin.site.register(models.Atributo)
+admin.site.register(models.Expreso)
+admin.site.register(models.Abastecimiento)
+admin.site.register(models.Contacto,ContactoAdmin)
+admin.site.register(models.Pedido, PedidoAdmin)
+admin.site.register(models.PedidoYBien, PedidoItemsAdmin)
+admin.site.register(models.Impuesto)
+admin.site.register(models.Moneda)
+admin.site.register(models.Proforma, ProformaAdmin)

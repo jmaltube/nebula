@@ -29,7 +29,10 @@
                             <div class="tab-content">
                                 {% for pedido in pedidos %}
                                 <div role="tabpanel" {% if forloop.last %} class="tab-pane fade in active" {% else %} class="tab-pane fade" {% endif %} id="{{ pedido.id }}">
-                                    <a>{% trans "Estado del pedido" %}: <strong>{{ pedido.get_estado_display }}</strong></a> 
+                                    <a>{% trans "Fecha de creación" %}: <strong> {{ pedido.fecha_creacion }} </strong></a><br>
+                                
+                                    <a>{% trans "Proformas asociadas" %}: <strong> {% for proforma in pedido.proforma_set.all %} {{ proforma}} // {% endfor %}</strong></a><br>
+
                                     <table cellspacing="0" class="shop_table cart">
                                         <thead>
                                             <tr>
@@ -60,10 +63,10 @@
                                                     <span class="amount">{{ item.bien.codigo }}</span>
                                                 </td>
                                                 <td class="product-price">
-                                                    <span class="amount">{{ item.get_precio }}</span>
+                                                    <span class="amount">{{ item.precio }}</span>
                                                 </td>
                                                 <td class="product-quantity">
-                                                    <span class="amount">{{ item.cantidad }}</span>
+                                                    <span class="amount">{{ item.cantidad_solicitada }}</span>
                                                 </td>
                                                 <!-- <td class="product-quantity">
                                                             <div class="quantity buttons_added">
@@ -78,8 +81,9 @@
                                             </tr>
                                             {% endfor %}
                                             <tr>
-                                                {% if pedido.abierto and pedido.get_cantidad_total > 0 %}
+                                                {% if not pedido.confirmado_x_cliente and pedido.get_cantidad_total > 0 %}
                                                 <td class="actions" colspan="7">
+                                                    <a> <strong> {% trans "El carrito de compra se eliminará pasadas las 24hs de no ser confirmado" %}</strong> </a>
                                                     <a class="add_to_cart_button confirm" href=# style="float: right"> {% trans "Confirmar pedido" %} </a>
                                                 </td>
                                                 {% endif %}
@@ -121,7 +125,7 @@
         <script>
         
         $(document).on("click", ".confirm", function(e) {
-            bootbox.confirm("¿Realmente desea confirmar el pedido. Esta confirmación no puede ser deshecha. Se notificará por correo al vendedor con copia a ud. mismo con el detalle de su pedido.", function(result) {
+            bootbox.confirm("¿Realmente desea confirmar el pedido. Esta confirmación no puede ser revertida. Se notificará por correo al vendedor con copia a ud. mismo con el detalle de su pedido.", function(result) {
                 if (result){
                     document.location.href = "/checkout";
                 }

@@ -6,7 +6,9 @@ from django.db import models
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django.core.signing import Signer
+from django.db.models.signals import post_save
 import operator
+from django.utils.translation import ugettext_lazy, ugettext as _
 
 IVA = [('RI','Responsable Inscripto'), ('EXC','Excento'), ('MON', 'Monotributista'), ('NOR', 'No Responsable')]
 
@@ -60,6 +62,9 @@ class Marca(models.Model):
 
     def __str__(self):
         return self.denominacion
+
+    def __unicode__(self):
+        return self.denominacion 
     
     class Meta:
         ordering = ["denominacion"]                
@@ -79,10 +84,10 @@ class Clasificador(models.Model):
     rubro = models.ForeignKey(Rubro)
     
     def __str__(self):
-        return self.denominacion + " | " + self.rubro.denominacion 
+        return self.denominacion 
 
     def __unicode__(self):
-        return self.denominacion + " | " + self.rubro.denominacion 
+        return self.denominacion 
 
     class Meta:
         ordering = ["denominacion"]
@@ -127,6 +132,7 @@ class Proveedor(models.Model):
             ]         
 
     #Datos generales
+    user = models.OneToOneField(User, blank=True, null=True)    
     razon_social = models.CharField(max_length=50)
     nombre_fantasia = models.CharField(verbose_name='Nombre de fantasía',max_length=50,blank=True, null=True)
     fecha_alta = models.DateField(auto_now_add=True)
@@ -308,20 +314,20 @@ class Lista(models.Model):
     def get_bienes(self, include_hidden=True, search_bien_id=None, search_string="", clasificador=None, cliente=None):
         if clasificador:
             lista_clasificador = list(self.listayclasificador_set.filter(clasificador=clasificador))
-            lista_bien = list(self.listaybien_set.filter(bien__denominacion__icontains=search_string, bien__clasificador = clasificador))        
+            lista_bien = list(self.listaybien_set.filter(Q(bien__denominacion__icontains=search_string) | Q(bien__codigo__icontains=search_string), bien__clasificador = clasificador))        
         else:
             lista_clasificador = list(self.listayclasificador_set.all())
-            lista_bien = list(self.listaybien_set.filter(bien__denominacion__icontains=search_string ))
+            lista_bien = list(self.listaybien_set.filter(Q(bien__denominacion__icontains=search_string) | Q(bien__codigo__icontains=search_string)))
                                                     
         bienes=[]
         
         if cliente:
             if clasificador:
                 cliente_clasificador = cliente.clienteyclasificador_set.filter(clasificador=clasificador)
-                cliente_bien = cliente.clienteybien_set.filter(bien__denominacion__icontains=search_string, bien__clasificador = clasificador)
+                cliente_bien = cliente.clienteybien_set.filter(Q(bien__denominacion__icontains=search_string) | Q(bien__codigo__icontains=search_string), bien__clasificador = clasificador)
             else:
                 cliente_clasificador = cliente.clienteyclasificador_set.all()
-                cliente_bien = cliente.clienteybien_set.filter(bien__denominacion__icontains=search_string)
+                cliente_bien = cliente.clienteybien_set.filter(Q(bien__denominacion__icontains=search_string) | Q(bien__codigo__icontains=search_string))
 
             for l in lista_clasificador:
                 if not (not include_hidden and not l.visible):
@@ -356,7 +362,7 @@ class Lista(models.Model):
                                        
         for l in lista_clasificador:
             if not (not include_hidden and not l.visible):
-                for b in l.clasificador.bien_set.filter(Q(denominacion__icontains=search_string) | Q(clasificador__denominacion__icontains=search_string)):                      
+                for b in l.clasificador.bien_set.filter(Q(denominacion__icontains=search_string) | Q(codigo__icontains=search_string) | Q(clasificador__denominacion__icontains=search_string)):                      
                     for z in lista_bien:                
                         if z.bien == b and z.margen > 0:                    
                             b.costo = self.calcular_costo(costo=b.costo, margen=z.margen, moneda=z.bien.moneda())                            
@@ -429,13 +435,13 @@ class Expreso(models.Model):
         
 class Cliente(models.Model):    
     #Datos generales
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(User, blank=True, null=True)
     lista = models.ForeignKey(Lista, on_delete=models.SET_NULL, null=True)
     razon_social = models.CharField(max_length=50)
     nombre_fantasia = models.CharField(max_length=50,blank=True, null=True)
     rubro = models.ForeignKey(Rubro)
     fecha_alta = models.DateField(auto_now_add=True)
-    habilitado = models.BooleanField(default=True)
+    habilitado = models.BooleanField(help_text=_("Editable solo por admin"), default=False)
     expreso =  models.ForeignKey(Expreso, on_delete=models.SET_NULL, blank=True, null=True)
     corredor = models.ForeignKey(Proveedor, on_delete=models.SET_NULL, blank=True, null=True)
     telefono = models.CharField(verbose_name="teléfono oficial", max_length=50,blank=True, null=True)
@@ -500,48 +506,61 @@ class ClienteYBien(models.Model):
         return self.cliente.razon_social + "||" + self.bien.denominacion
         
 class Pedido(models.Model):
-    Status = [ ('ABR','Abierto'),('CHK', 'Confirmado por cliente'),('PRE', 'En preparación'), ('COM', 'Completo'), ('CAN', 'Cancelado')]
+    #Status = [ ('ABR','Abierto'),('CHK', 'Confirmado por cliente'),('PRE', 'En preparación'), ('COM', 'Completo'), ('CAN', 'Cancelado')]
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
     fecha_actualizacion = models.DateField(verbose_name='Ult. modificación',auto_now=True)
+    fecha_creacion = models.DateField(verbose_name='Fecha de creación',auto_now_add=True)
     fecha_prevista_entrega = models.DateField(blank=True, null=True)
-    estado = models.CharField(max_length=3, choices=Status, default='ABR')
+    #estado = models.CharField(max_length=3, choices=Status, default='ABR')
+    confirmado_x_cliente = models.BooleanField(default = True)
+    validado_x_admin = models.BooleanField(verbose_name='Validado',help_text=_("Editable solo por admin"),default = False)
     bienes = models.ManyToManyField(Bien, through='PedidoYBien')
     vendedor = models.ForeignKey(Proveedor, on_delete=models.SET_NULL, null=True, blank=True, limit_choices_to={'corredor':True})
     observaciones = models.TextField(null=True, blank=True) 
+    presupuesto = models.BooleanField(verbose_name='Es Presupuesto?', default=False)
     
     def get_precio_total(self):   
         total = 0
         for pedidoybien in self.pedidoybien_set.all():
-            try:
-                costo = self.cliente.lista.get_bienes(search_bien_id=pedidoybien.bien.id, cliente=self.cliente).costo
-            except:
-                costo = 0
-            total += costo * pedidoybien.cantidad
+            total += pedidoybien.precio_con_descuento() * pedidoybien.cantidad_solicitada
+        return total
+
+    def get_costo_total(self):   
+        total = 0
+        for pedidoybien in self.pedidoybien_set.all():
+            total += pedidoybien.bien.costo * pedidoybien.cantidad_solicitada
         return total
 
     def get_cantidad_total(self):
         return self.bienes.all().count()
 
     def pendientes(self):
-        return not self.pedidoybien_set.filter(entregado=False).exists()
+        if not self.presupuesto:
+            try:
+                items_en_proforma = self.pedidoybien_set.filter(proforma__cancelada=False).annotate(cantidad=models.Sum('proformaybien__cantidad'))
+                if items_en_proforma:
+                    for item in items_en_proforma:
+                        if item.cantidad < item.cantidad_solicitada:
+                            return True
+                    return False
+                else:
+                    return True
+            except:
+                return True
+        else:
+            return False
     pendientes.boolean = True
     pendientes.short_description = 'Estado pendientes'
     
-    def abierto(self):
-        return True if self.estado == 'ABR' else False
-    
-    def cerrado (self):
-        return True if self.estado in ('COM','CAN') else False
-
     def checkout(self):
-        self.estado = 'CHK'
+        self.confirmado_x_cliente = True
             
     def __str__(self):
         return "{0} #{1}".format(str(self.cliente), self.id)
 
     def __unicode__(self):
         return "{0} #{1}".format(str(self.cliente), self.id)
-    
+
     class Meta:
         verbose_name_plural = " Pedidos"
         permissions = (("action_pedido", "Ejecutar acciones"),)
@@ -549,28 +568,89 @@ class Pedido(models.Model):
 class PedidoYBien(models.Model):
     pedido = models.ForeignKey(Pedido)
     bien = models.ForeignKey(Bien)
-    cantidad = models.IntegerField(validators=[MinValueValidator(0, message="Solo cantidades positivas.")])
+    cantidad_solicitada = models.IntegerField(validators=[MinValueValidator(0, message="Solo cantidades positivas.")])
+    precio = models.DecimalField(max_digits=10, decimal_places=2, blank=True)
     descuento = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     observaciones = models.CharField(max_length=100, null=True, blank=True)
-    entregado = models.BooleanField(default=False)
         
-    def get_precio(self):
+    def precio_con_descuento(self):
         if self.descuento:
             dto = 1-(self.descuento/100)
         else:
             dto = 1
-        try:
-            costo = self.pedido.cliente.lista.get_bienes(include_hidden=False, search_bien_id=self.bien.id, cliente=self.pedido.cliente).costo
-        except:
-            costo = 0
-        precio = round(costo * dto,2)
+        precio = round(self.precio * dto,2)
         return precio or 0
         
     def subtotal(self):
-        return self.get_precio() * self.cantidad
+        return self.precio * self.cantidad_solicitada
+    
+    def subtotal_pendiente(self):
+        return self.precio * self.cantidad_pendiente()
+
+    def save(self, *args, **kwargs): #OVERRIDE
+        if not self.precio:
+            try:
+                precio = self.pedido.cliente.lista.get_bienes(include_hidden=False, search_bien_id=self.bien.id, cliente=self.pedido.cliente).costo
+            except Exception as e:
+                precio = 0
+            finally:
+                self.precio = precio
+        super(PedidoYBien, self).save(*args, **kwargs)
+
+    def cantidad_entregada(self):
+        cant_entregada = self.proformaybien_set.filter(proforma__cancelada=False).aggregate(cant_entregada=models.Sum('cantidad'))
+        return cant_entregada['cant_entregada'] or 0
+
+    def cantidad_pendiente(self):
+        try:
+            return  self.cantidad_solicitada - self.cantidad_entregada()
+        except:
+            return None
+
+    def entregado(self):
+        cant_entregada = self.cantidad_entregada()         
+        return True if cant_entregada >= self.cantidad_solicitada else False
 
     def __str__(self):
-        return "{0}, bien: {1}, cant: {2}".format(self.pedido, self.bien, self.cantidad)
+        return "{0}, bien: {1}, cant: {2}".format(self.pedido, self.bien, self.cantidad_solicitada)
 
     def __unicode__(self):
-        return "{0}, bien: {1}, cant: {2}".format(self.pedido, self.bien, self.cantidad)
+        return "{0}, bien: {1}, cant: {2}".format(self.pedido, self.bien, self.cantidad_solicitada)
+
+    class Meta:             
+        unique_together = ('pedido', 'bien') 
+        verbose_name_plural = _(" Pedidos (items pendientes)")
+
+class Proforma(models.Model):
+    cliente = models.ForeignKey(Cliente)
+    fecha_creacion = models.DateField(auto_now_add=True)
+    factura = models.CharField(max_length=50, null=True, blank=True)
+    observaciones = models.TextField(null=True, blank=True)
+    pedidos = models.ManyToManyField(Pedido)
+    bienes = models.ManyToManyField(PedidoYBien, through='ProformaYBien')
+    cancelada = models.BooleanField(default=False)
+
+    def __str__(self):
+        return "{0}#{1} {2}".format(self.cliente, self.id, self.fecha_creacion)
+
+    def __unicode__(self):
+        return "{0}#{1} {2}".format(self.cliente, self.id, self.fecha_creacion)
+
+    class Meta:             
+        verbose_name_plural = _(" Proformas")
+        permissions = (("action_proforma", "Ejecutar acciones"),)   
+
+class ProformaYBien(models.Model):
+    proforma = models.ForeignKey(Proforma)
+    item = models.ForeignKey(PedidoYBien)
+    cantidad = models.IntegerField(validators=[MinValueValidator(0, message="Solo cantidades positivas.")])
+
+    def __str__(self):
+        return "{0} {1} x {2}".format(self.proforma,self.item, self.cantidad)
+
+    def __unicode__(self):
+        return "{0} {1} x {2}".format(self.proforma,self.item, self.cantidad)
+
+    class Meta:             
+        unique_together = ('proforma', 'item') 
+    

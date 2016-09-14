@@ -1,0 +1,37 @@
+{% load admin_static %}
+    <div>
+        <table>
+            <thead>
+                <tr>
+                    <th><strong>BIEN</strong></th>
+                    <th><strong>CANT. PENDIENTE</strong></th>
+                    <th><strong>$TOTAL PENDIENTE</strong></th>
+                    <th><strong>OBSERVACIONES</strong></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for item in pedido.pedidoybien_set.all %}
+                {% if not item.entregado %}
+
+                <tr class={% cycle 'row1' 'row2' %}>
+                    <td>
+                        <span>{{ item.bien.denominacion }}</span>
+                    </td>
+                    <td>
+                        <span>{{ item.cantidad_pendiente }}</span>
+                    </td>
+                    <td>
+                        <span>{{ item.subtotal_pendiente }}</span>
+                    </td>
+                    <td>
+                        <span>{{ item.observaciones }}</span>
+                    </td>
+                </tr>
+                {% endif %}
+            {% endfor %}            
+               
+            </tbody>
+        </table>
+
+
+    </div>

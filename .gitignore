@@ -1,10 +1,8 @@
 *.pyc
 __pycache__
-bin/
-include/
-lib/
-man/
 static/media/
 settings.py
 pip-selfcheck.json
 *.pdf
+venv/
+myenv/

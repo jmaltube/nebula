@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 from django.contrib.admin import SimpleListFilter
 from django.utils.translation import ugettext_lazy as _
+from django.db import models
+from django.db.models import F
+
+
+#--------------------ADMIN FILTERS--------------------#             
 
 class ItemsPendientesListFilter(SimpleListFilter):
     # Human-readable title which will be displayed in the
@@ -19,8 +24,8 @@ class ItemsPendientesListFilter(SimpleListFilter):
         in the right sidebar.
         """
         return (
-            ('NO', _('Sin items pendientes')),
-            ('YES', _('Con items pendientes')),
+            ('NO', _('items pendientes')),
+            ('YES', _('items entregados')),
         )
 
     def queryset(self, request, queryset):
@@ -32,7 +37,14 @@ class ItemsPendientesListFilter(SimpleListFilter):
         # Compare the requested value (either 'NO' or 'YES')
         # to decide how to filter the queryset.
         if self.value() == 'NO':
-            return queryset.filter(pedidoybien__entregado=True).distinct()
+            return queryset.annotate(cantidad=models.Sum('proformaybien__cantidad')).filter(cantidad__lt=F('cantidad_solicitada'))
+
         if self.value() == 'YES':
-            return queryset.filter(pedidoybien__entregado=False).distinct()
-                                    
+            #return queryset.filter(pedidoybien__entregado=False).distinct()
+            return queryset.annotate(cantidad=models.Sum('proformaybien__cantidad')).filter(cantidad__gte=F('cantidad_solicitada'))
+            
+
+#--------------------MODEL MANAGERS--------------------#             
+class PedidoYBienPendienteManager(models.Manager):
+    def get_queryset(self):
+        return super(PedidoYBienPendienteManager, self).get_queryset().filter(author='Roald Dahl')                                    
