@@ -14,6 +14,8 @@ from django.db.models import Q, Count
 from django.utils.translation import ugettext as _
 from django.utils.translation import ugettext_lazy
 from django.conf import settings
+from django.http import HttpResponseServerError
+
 
 #////////////////////# PUBLIC #////////////////////# 
 def index(request):
@@ -78,38 +80,45 @@ def vidriera(request):
     return render(request, 'vidriera.html', context)
 
 def catalogo(request):
-    lista = get_lista(request)
-    cliente = request.user.cliente if request.user.is_authenticated() else None
-    context = get_base_context(request=request)
-    signer = Signer()
-    signed_id = None
-    
-    if request.method == 'GET': 
-        signed_id = request.GET.get('bien_id',0)        
-    else:
-        if 'add_to_cart_button' in request.POST:
-            signed_id = request.POST.get('bien_id',0)
-            add_to_cart(request)
+    try:
+        lista = get_lista(request)
+        cliente = request.user.cliente if request.user.is_authenticated() else None
+        context = get_base_context(request=request)
+        signer = Signer()
+        signed_id = None
+        
+        if request.method == 'GET': 
+            signed_id = request.GET.get('bien_id',0)        
+        else:
+            if 'add_to_cart_button' in request.POST:
+                signed_id = request.POST.get('bien_id',0)
+                add_to_cart(request)
 
-    if signed_id:
-        bien_id = int(signer.unsign(signed_id),0)
-        if lista and (bien_id > 0):
-            bien = lista.get_bienes(include_hidden=False, search_bien_id=bien_id, cliente=cliente)
-            context['bien'] = bien
-            context['impuesto'] = lista.impuesto
-            atributos = models.BienYAtributo.objects.filter(bien__id=bien.id)
-            context['atributos'] = atributos
+        if signed_id:
+            bien_id = int(signer.unsign(signed_id),0)
+            if lista and (bien_id > 0):
+                bien = lista.get_bienes(include_hidden=False, search_bien_id=bien_id, cliente=cliente)
+                context['bien'] = bien
+                context['impuesto'] = lista.impuesto
+                atributos = models.BienYAtributo.objects.filter(bien__id=bien.id)
+                context['atributos'] = atributos
+    except AttributeError as e:
+        return HttpResponseServerError(e)
     return render(request, 'catalogo.html', context)
 
 def pedido(request):
-    if request.user.is_authenticated():
-        context = get_base_context(request)
-        context['pedidos'] = models.Pedido.objects.filter(cliente=request.user.cliente).order_by('id')[:10]
-        context['impuesto'] = get_lista(request).impuesto
-        return render(request, 'pedido.html',context)
-    else:
-        return HttpResponseRedirect(reverse('index'))
-            
+    try: 
+        if request.user.is_authenticated():
+            context = get_base_context(request)
+            context['pedidos'] = models.Pedido.objects.filter(cliente=request.user.cliente).order_by('id')[:10]
+            context['impuesto'] = get_lista(request).impuesto
+            return render(request, 'pedido.html',context)
+        else:
+            return HttpResponseRedirect(reverse('index'))
+    except Exception as e:
+        print(e)
+        return HttpResponseServerError(e)
+
 def login(request):
     if request.method == 'POST':
         login_form = LoginForm(request.POST)
@@ -118,8 +127,12 @@ def login(request):
             password = login_form.cleaned_data.get('password')
             user = authenticate(username=username, password=password)
             if user:
-                admin_login(request, user)
-                return HttpResponseRedirect(reverse('vidriera'))    
+                try:
+                    if user.cliente.habilitado:
+                        admin_login(request, user)
+                        return HttpResponseRedirect(reverse('vidriera'))
+                except ObjectDoesNotExist as e:
+                    login_form.add_error(None, ValidationError(_('No esta asociado a un cliente habilitado'), code='invalid'))
             else:                
                 login_form.add_error(None, ValidationError(_('Usuario y/o contraseña incorrectos'), code='invalid'))    
     else:
@@ -189,7 +202,7 @@ def checkout(request):
             context['impuesto'] = lista.impuesto
             template = loader.get_template('pedido_email.html')
             message = template.render(context)  
-            mail_admins(subject=subject , message="automated email",fail_silently=False, connection=None, html_message=message)        
+            mail_admins(subject=subject , message="automatic email please do not respond",fail_silently=False, connection=None, html_message=message)        
         except Exception as e:
             pass
     

@@ -19,6 +19,8 @@ from django.conf import settings
 import datetime
 from django.db.models import Q
 import json 
+from django.core.mail import mail_admins, send_mail
+from django.utils.translation import ugettext as _
 
 #--------------------PRIVATE--------------------#                         
 
@@ -291,7 +293,7 @@ def reporte_lista(request, lista_id=None, format='HTML'):
 @login_required(login_url='/admin/login/')
 def reporte_pedido_pendientes(request, ids=None, format='HTML'):
     try:
-        pedidos = models.Pedido.objects.filter(id__in=ids.split(',')).exclude(estado__in=['CAN', 'COM']).filter( pedidoybien__entregado=False).distinct()
+        pedidos = models.Pedido.objects.filter(id__in=ids.split(',')).filter(presupuesto=False)
         context = {'title':'Lista de pedidos con pendientes','pedidos':pedidos,'opts':models.Pedido._meta}
 
         if format == "HTML":
@@ -302,6 +304,7 @@ def reporte_pedido_pendientes(request, ids=None, format='HTML'):
             file_name = "Pedido_pendientes_{0}".format(str(datetime.date.today()))
             return generate_pdf(request,'reports/pedido_pendientes.html',context, file_name )
     except Exception as e:
+        print(e)
         return HttpResponseRedirect('/admin/bienes_app/pedido/')
 
 @login_required(login_url='/admin/login/')
@@ -440,3 +443,23 @@ def generar_proforma_view(request, pedido_ids):
                 proforma_y_bien = models.ProformaYBien(proforma=proforma, item=item, cantidad=item.cantidad_pendiente())                
                 proforma_y_bien.save()
         return HttpResponseRedirect(reverse("admin:{0}_{1}_change".format(models.Proforma._meta.app_label, models.Proforma._meta.model_name),args=(proforma.pk,)))
+
+@login_required(login_url='/admin/login/')
+@transaction.atomic
+def enviar_pedido_valorizado_view(request, pedido_ids):
+    if request.method == 'GET':
+        ids = pedido_ids.split(",")
+        for id in ids:
+            pedido = models.Pedido.objects.get(id=id)
+            try:
+                contacto = pedido.cliente.contactos.get(cargo='COM')
+                context = {'carrito':pedido}
+                subject = _("{1} | Pedido valorizado #{0}".format(str(pedido.id),settings.COMPANY_NAME))
+                context['domain'] = settings.COMPANY_DOMAIN_NAME 
+                context['impuesto'] = pedido.cliente.lista.impuesto
+                template = get_template('pedido_email.html')
+                message = template.render(context)  
+                send_mail(subject=subject , message="automatic email please do not respond",from_email=settings.EMAIL_HOST_USER,recipient_list=[contacto.email,] , html_message=message)
+            except Exception as e:
+                return HttpResponseServerError(e)
+        return HttpResponseRedirect(reverse("admin:{0}_{1}_changelist".format(models.Pedido._meta.app_label, models.Pedido._meta.model_name)))        

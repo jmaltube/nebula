@@ -509,7 +509,7 @@ class Pedido(models.Model):
     #Status = [ ('ABR','Abierto'),('CHK', 'Confirmado por cliente'),('PRE', 'En preparación'), ('COM', 'Completo'), ('CAN', 'Cancelado')]
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
     fecha_actualizacion = models.DateField(verbose_name='Ult. modificación',auto_now=True)
-    fecha_creacion = models.DateField(verbose_name='Fecha de creación',auto_now_add=True)
+    fecha_creacion = models.DateTimeField(verbose_name='Fecha de creación',auto_now_add=True)
     fecha_prevista_entrega = models.DateField(blank=True, null=True)
     #estado = models.CharField(max_length=3, choices=Status, default='ABR')
     confirmado_x_cliente = models.BooleanField(default = True)

@@ -47,6 +47,7 @@ urlpatterns = [
     url(r'^admin/bienes_app/actions/duplicar-lista/$',bienes_views.duplicar_lista_view, name='duplicar-lista'),
     url(r'^admin/bienes_app/actions/modificar-costo/$',bienes_views.modificar_costo_view, name='modificar-costo'),
     url(r'^admin/bienes_app/actions/generar-proforma/(?P<pedido_ids>\d+(,\d+)*)/$',bienes_views.generar_proforma_view, name='generar-proforma'),
+    url(r'^admin/bienes_app/actions/enviar-pedido-valorizado/(?P<pedido_ids>\d+(,\d+)*)/$',bienes_views.enviar_pedido_valorizado_view, name='enviar-pedido-valorizado'),
     url(r'^admin/bienes_app/reports/reporte-lista/(?P<format>\w+)/(?P<lista_id>\d+)/$',bienes_views.reporte_lista, name='reporte-lista'),
     url(r'^admin/bienes_app/reports/reporte-pedido-pendientes/(?P<format>\w+)/(?P<ids>\d+(,\d+)*)/$',bienes_views.reporte_pedido_pendientes, name='reporte-pedido-pendientes'),
     url(r'^admin/bienes_app/reports/popup-pedidos-pendientes/(?P<pedido_id>\d+)/$',bienes_views.popup_pedidos_pendientes, name='popup-pedidos-pendientes'),

@@ -92,18 +92,27 @@ $(document).ready(function () {
       };
 
       function utilidad() {
-            precio = $('.field-precio_total').find('p').text();
-            precio = parseFloat(precio).toFixed(2);
+            var precio = $('.field-precio_total').find('p').text();
+            var precio = parseFloat(precio).toFixed(2);
 
-            costo = $('.field-costo_total').find('p').text();
-            costo = parseFloat(costo).toFixed(2);
+            var costo = $('.field-costo_total').find('p').text();
+            var costo = parseFloat(costo).toFixed(2);
 
-            porc = 0;
+            var porc = 0;
             if (!isNaN(precio) && !isNaN(costo)){
                   porc = ((precio / costo)-1) * 100;
             }
 
             $('.field-utilidad').find('p').text(porc.toFixed(2) + "%");
       };
+
+      $("[id*='popimg']").click(function () {
+            var id = $(this).data('id');
+            var url = $(this).data('url');   
+            $('#popup'+id).bPopup({
+                  contentContainer: '.content'+id,
+                  loadUrl: url
+            });
+      });
 
 }); 

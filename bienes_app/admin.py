@@ -16,6 +16,7 @@ from django.utils.translation import ugettext_lazy, ugettext as _
 from django.db.models import F
 from django.db import models as db_models
 from django.db.models.functions import Coalesce  
+
 #--------------------ACTIONS--------------------#             
 def duplicar_bien_action(modeladmin, request, queryset):
     if request.user.has_perm('bienes_app.action_bien'):    
@@ -69,6 +70,13 @@ def generar_proforma_action(modeladmin, request, queryset):
     if request.user.has_perm('bienes_app.action_pedido'):
         selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
         return HttpResponseRedirect(reverse('generar-proforma', kwargs={'pedido_ids':",".join(selected)}))
+    else:
+        return HttpResponseRedirect("/admin/bienes_app/pedido/")
+
+def enviar_pedido_valorizado_action(modeladmin, request, queryset): 
+    if request.user.has_perm('bienes_app.action_pedido'):
+        selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
+        return HttpResponseRedirect(reverse('enviar-pedido-valorizado', kwargs={'pedido_ids':",".join(selected)}))
     else:
         return HttpResponseRedirect("/admin/bienes_app/pedido/")
 
@@ -187,17 +195,7 @@ class PedidoAdmin(admin.ModelAdmin):
                 <span class="button b-close"><span>x</span></span>
                 <div class="content{0}" style="height: auto; width: auto;"></div>
             </div>        
-            <img src="{2}admin/img/icon-no.svg" alt="XXX" title="Click para mas info" id="pop{0}"/>
-            <script>
-                $(function(){{
-                    $('#pop{0}').click(function(){{
-                        $('#popup{0}').bPopup({{
-                            contentContainer:'.content{0}',
-                            loadUrl:'{1}'
-                        }});
-                    }});
-                }});
-            </script>
+            <img id="popimg{0}" src="{2}admin/img/icon-no.svg" alt="XXX" title="Click para mas info"  data-id={0} data-url={1} />            
             '''
             ,self.pk,reverse('popup-pedidos-pendientes', kwargs={'pedido_id':self.pk}),settings.STATIC_URL)   
         else:
@@ -209,10 +207,9 @@ class PedidoAdmin(admin.ModelAdmin):
     exclude = ('confirmado_x_cliente',)
     ordering = ('-fecha_creacion','cliente', 'fecha_actualizacion')
     search_fields = ('cliente', 'vendedor', 'pedido__bien')    
-    actions = (reporte_pedido_pendientes_action,)
+    actions = (reporte_pedido_pendientes_action, enviar_pedido_valorizado_action, generar_proforma_action,)
     reporte_pedido_pendientes_action.short_description = "Reporte de pedidos pendientes"
     form = admin_forms.PedidoForm
-    actions = (generar_proforma_action,)
     readonly_fields = ('fecha_creacion','estado_pendientes','precio_total', 'costo_total', 'utilidad')    
     generar_proforma_action.short_description = _("Generar proforma")
 

@@ -23,7 +23,7 @@
                 {% for item in carrito.pedidoybien_set.all %}
                 <tr>
                     <td>
-                        <a href="{{ domain }}/catalogo/?bien_id={{ bien.id }}">{{ item.bien.denominacion }}</a>
+                        <a href="{{ domain }}/catalogo/?bien_id={{ item.bien.sign_id }}">{{ item.bien.denominacion }}</a>
                     </td>
                     <td>
                         <span>{{ item.bien.codigo }}</span>
@@ -35,14 +35,6 @@
                     <td>
                         <span>{{ item.cantidad_solicitada }}</span>
                     </td>
-
-                    <!-- <td class="product-quantity">
-                                                    <div class="quantity buttons_added">
-                                                        <input type="button" class="minus" value="-">
-                                                        <input type="number" size="4" class="input-text qty text" title="Qty" value="1" min="0" step="1">
-                                                        <input type="button" class="plus" value="+">
-                                                    </div>
-                                                </td> -->
 
                     <td>
                         <span>{{ item.subtotal }}</span>

@@ -6,3 +6,4 @@ pip-selfcheck.json
 *.pdf
 venv/
 myenv/
+logs/

@@ -31,7 +31,7 @@
                                 <div role="tabpanel" {% if forloop.last %} class="tab-pane fade in active" {% else %} class="tab-pane fade" {% endif %} id="{{ pedido.id }}">
                                     <a>{% trans "Fecha de creación" %}: <strong> {{ pedido.fecha_creacion }} </strong></a><br>
                                 
-                                    <a>{% trans "Proformas asociadas" %}: <strong> {% for proforma in pedido.proforma_set.all %} {{ proforma}} // {% endfor %}</strong></a><br>
+                                    {% if pedido.confirmado_x_cliente %} <a>{% trans "Proformas asociadas" %}: <strong> {% for proforma in pedido.proforma_set.all %} {{ proforma}} // {% endfor %}</strong></a><br> {% endif %}
 
                                     <table cellspacing="0" class="shop_table cart">
                                         <thead>
@@ -83,7 +83,7 @@
                                             <tr>
                                                 {% if not pedido.confirmado_x_cliente and pedido.get_cantidad_total > 0 %}
                                                 <td class="actions" colspan="7">
-                                                    <a> <strong> {% trans "El carrito de compra se eliminará pasadas las 24hs de no ser confirmado" %}</strong> </a>
+                                                    <div class="alert alert-warning" role="alert">{% trans "El carrito de compra se eliminará pasadas las 24hs de no ser confirmado" %}</div>
                                                     <a class="add_to_cart_button confirm" href=# style="float: right"> {% trans "Confirmar pedido" %} </a>
                                                 </td>
                                                 {% endif %}
