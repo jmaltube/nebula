@@ -45,6 +45,6 @@ class ItemsPendientesListFilter(SimpleListFilter):
             
 
 #--------------------MODEL MANAGERS--------------------#             
-class PedidoYBienPendienteManager(models.Manager):
+class PedidoPendientesManager(models.Manager):
     def get_queryset(self):
         return super(PedidoYBienPendienteManager, self).get_queryset().filter(author='Roald Dahl')                                    

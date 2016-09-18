@@ -537,7 +537,7 @@ class Pedido(models.Model):
     def pendientes(self):
         if not self.presupuesto:
             try:
-                items_en_proforma = self.pedidoybien_set.filter(proforma__cancelada=False).annotate(cantidad=models.Sum('proformaybien__cantidad'))
+                items_en_proforma = self.pedidoybien_set.exclude(proforma__cancelada=True).annotate(cantidad=models.Sum('proformaybien__cantidad'))
                 if items_en_proforma:
                     for item in items_en_proforma:
                         if item.cantidad < item.cantidad_solicitada:
@@ -598,7 +598,7 @@ class PedidoYBien(models.Model):
         super(PedidoYBien, self).save(*args, **kwargs)
 
     def cantidad_entregada(self):
-        cant_entregada = self.proformaybien_set.filter(proforma__cancelada=False).aggregate(cant_entregada=models.Sum('cantidad'))
+        cant_entregada = self.proformaybien_set.exclude(proforma__cancelada=True).aggregate(cant_entregada=models.Sum('cantidad'))
         return cant_entregada['cant_entregada'] or 0
 
     def cantidad_pendiente(self):
