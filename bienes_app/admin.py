@@ -111,7 +111,7 @@ class BienAdmin(admin.ModelAdmin):
             return format_html('<span style="color: #{0};">{1}</span>',color,obj.costo_base_proveedor())
     costo_base_proveedor_colored.short_description = 'COSTO PROVEEDOR'
     
-    fieldsets = ((None, {'fields':('codigo', 'denominacion', 'habilitado', 'costo', 'unidad', 'clasificador', 'forma_abastecimiento', 'importado', 'sin_stock', 'marca', 'bulto')}),
+    fieldsets = ((None, {'fields':('codigo', 'denominacion', 'habilitado', 'costo', 'unidad', 'clasificador', 'forma_abastecimiento', 'importado', 'sin_stock','r','e','primeros_4_digitos','marca', 'bulto')}),
                  ('Imagenes', {'classes':('collapse',), 'fields':('imagen1', 'imagen2','imagen3','imagen4','imagen5')}),    
     )
     
@@ -149,7 +149,7 @@ class ProveedorAdmin(admin.ModelAdmin):
     
     readonly_fields = ('get_fecha_alta',)
     fieldsets = (
-        ('Datos generales',{'fields':('user','razon_social','nombre_fantasia','get_fecha_alta','telefono','fax','website','email','tipo','direccion','codigo_postal','partido','localidad','provincia','pais','contactos')}),        
+        ('Datos generales',{'fields':('user','razon_social','nombre_fantasia','get_fecha_alta','telefono','fax','website','email','tipo','direccion','codigo_postal','pais','provincia','localidad','contactos')}),        
         ('Datos comerciales',{'classes':('collapse',),'fields':('cuit','condicion_comercial','forma_entrega','iva','tipo_factura','corredor','indirecto','agente_perc_iibb','agente_perc_iigg','agente_perc_iva','agente_perc_ss')})
     )  
     #filter_horizontal = ('contactos')
@@ -168,7 +168,7 @@ class ClienteAdmin(admin.ModelAdmin):
     search_fields = ('nombre_fantasia', 'razon_social', 'direccion', 'cuit', 'telefono', 'email', 'localidad', 'provincia' )    
     form = admin_forms.ClienteForm
     fieldsets = (
-        ('Datos generales',{'fields':('user','lista','razon_social','nombre_fantasia','rubro','get_fecha_alta','habilitado','expreso','corredor','telefono','email','website','direccion','codigo_postal','partido','localidad','provincia','pais','contactos')}),        
+        ('Datos generales',{'fields':('user','lista','razon_social','nombre_fantasia','rubro','get_fecha_alta','habilitado','expreso','corredor','telefono','email','website','direccion','codigo_postal','pais','provincia','localidad','contactos')}),        
         ('Datos comerciales',{'classes':('collapse',),'fields':('cuit','comprobante_cuit','condicion_comercial','informe_economico','limite_credito','iva','forma_entrega','alerta','mayorista','tipo_factura','agente_perc_iibb','agente_perc_iigg','agente_perc_iva','agente_perc_ss', 'jurisdiccion_iibb')})
     )
     
@@ -400,6 +400,9 @@ admin.site.register(models.Cliente, ClienteAdmin)
 admin.site.register(models.Bien, BienAdmin)
 admin.site.register(models.Proveedor, ProveedorAdmin)
 admin.site.register(models.Rubro)
+admin.site.register(models.Pais)
+admin.site.register(models.Provincia)
+admin.site.register(models.Localidad)
 admin.site.register(models.Compra, CompraAdmin)
 admin.site.register(models.Lista, ListaAdmin)
 admin.site.register(models.Clasificador,ClasificadorAdmin)
