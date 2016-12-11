@@ -60,7 +60,7 @@ class Localidad(models.Model):
         
 class Comprobantes(models.Model):
     tipo = models.CharField(max_length=50)
-    factor = models.IntegerField(blank=True, null=True)
+    factor = models.DecimalField(max_digits=5, decimal_places=2,blank=True, null=True)
     letra = models.CharField(max_length=3, blank=True, null=True)
     codigoafip = models.PositiveSmallIntegerField(blank=True, null=True)
     codigo = models.CharField(max_length=3, blank=True, null=True)
