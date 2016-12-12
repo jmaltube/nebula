@@ -10,7 +10,7 @@ from django.db.models.signals import post_save
 import operator
 from django.utils.translation import ugettext_lazy, ugettext as _
 
-IVA = [('RI','Responsable Inscripto'), ('EXC','Excento'), ('MON', 'Monotributista'), ('NOR', 'No Responsable')]
+IVA = [('RI','Responsable Inscripto'), ('EXC','Excento'), ('MON', 'Monotributista'), ('NOR', 'No Responsable'),('CF','Consumidor Final') ]
 Moneda = [('ARS','Peso Argentino'),('USD','Dólar'),('EUR','Euro'), ('BRL', 'Real')]
 
 class CondicionComercial(models.Model):
@@ -19,7 +19,7 @@ class CondicionComercial(models.Model):
 
     def __str__(self):
         return self.condicion
-    
+
     def __unicode__(self):
         return self.condicion
 
@@ -28,7 +28,7 @@ class Pais(models.Model):
 
     def __str__(self):
         return self.pais
-    
+
     def __unicode__(self):
         return self.pais
 
@@ -41,7 +41,7 @@ class Provincia(models.Model):
 
     def __str__(self):
         return self.provincia
-    
+
     def __unicode__(self):
         return self.provincia
 
@@ -51,13 +51,13 @@ class Localidad(models.Model):
 
     def __str__(self):
         return self.localidad
-    
+
     def __unicode__(self):
         return self.localidad
 
     class Meta:
         verbose_name_plural = "Localidades"
-        
+
 class Comprobantes(models.Model):
     tipo = models.CharField(max_length=50)
     factor = models.DecimalField(max_digits=5, decimal_places=2,blank=True, null=True)
@@ -68,7 +68,7 @@ class Comprobantes(models.Model):
 
     def __str__(self):
         return self.tipo
-    
+
     def __unicode__(self):
         return self.tipo
 
@@ -78,7 +78,7 @@ class TipoClasificador(models.Model):
 
     def __str__(self):
         return self.denominacion
-    
+
     def __unicode__(self):
         return self.denominacion
 
@@ -87,48 +87,48 @@ class Moneda(models.Model):
     moneda = models.CharField(choices=Moneda, max_length=3, unique=True)
     cotizacion = models.DecimalField(max_digits=5, decimal_places=2)
     visible = models.BooleanField(default=True)
-    
+
     def __str__(self):
         return u"%s (%s)" %(self.moneda, self.cotizacion)
-    
+
     def __unicode__(self):
         return u"%s (%s)" %(self.moneda, self.cotizacion)
-    
+
 
 
 class Abastecimiento(models.Model):
-    denominacion = models.CharField(max_length=50) 
+    denominacion = models.CharField(max_length=50)
 
     def __str__(self):
         return self.denominacion
-    
+
     class Meta:
         ordering = ["denominacion"]
         verbose_name = "Forma de Abastecimiento"
         verbose_name_plural = "Formas de Abastecimiento"
 
 class Marca(models.Model):
-    denominacion = models.CharField(max_length=50) 
+    denominacion = models.CharField(max_length=50)
 
     def __str__(self):
         return self.denominacion
 
     def __unicode__(self):
-        return self.denominacion 
-    
+        return self.denominacion
+
     class Meta:
-        ordering = ["denominacion"]                
+        ordering = ["denominacion"]
 
 class Rubro(models.Model):
     denominacion = models.CharField(max_length=50)
-    
+
     def __str__(self):
-        return self.denominacion    
-        
+        return self.denominacion
+
     class Meta:
         ordering = ["denominacion"]
         verbose_name_plural = "Rubros"
-                 
+
 class Clasificador(models.Model):
     denominacion = models.CharField(max_length=50)
     tipo = models.ForeignKey(TipoClasificador, blank=True, null=True)
@@ -139,10 +139,10 @@ class Clasificador(models.Model):
     rango = models.CharField(max_length=50, blank=True, null=True)
 
     def __str__(self):
-        return self.denominacion 
+        return self.denominacion
 
     def __unicode__(self):
-        return self.denominacion 
+        return self.denominacion
 
     class Meta:
         ordering = ["denominacion"]
@@ -152,101 +152,104 @@ class Impuesto(models.Model):
     impuesto = models.CharField(max_length=20, unique=True)
     valor = models.DecimalField(max_digits=5, decimal_places=2)
     visible = models.BooleanField(default=True)
-    
+
     def __str__(self):
         return "{0}: {1}%".format(self.impuesto, self.valor)
-    
+
     def __unicode__(self):
         return "{0}: {1}%".format(self.impuesto, self.valor)
-    
+
 class Contacto(models.Model):
     Cargo = [('COM','Comprador'), ('VEN','Vendedor'), ('COB', 'Cobrador'),
             ('DIR', 'Director'), ('SOC', 'Socio/Dueño'),('OTR', 'Otro')
             ]
-            
+
     nombre_apellido = models.CharField(verbose_name="Nombre y apellido",max_length=100, blank=True, null=True)
     cargo = models.CharField(max_length=3, choices=Cargo, default='OTR')
     telefono = models.CharField(max_length=50,blank=True, null=True)
     celular = models.CharField(max_length=50,blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     horario = models.CharField(verbose_name="Dias y horas de atención",max_length=50,blank=True, null=True)
-    
+
     def __str__(self):
         return self.nombre_apellido
-        
+
     class Meta:
         ordering = ["nombre_apellido"]
         verbose_name_plural = "Contactos"
 
 
 class Proveedor(models.Model):
-            
+
     TipoProveedor = [('BIU','Bien de uso'), ('GVA','Gastos varios'), ('IMP', 'Impuesto'),
             ('INS', 'Insumo'), ('MPR', 'Materia prima'), ('PTE', 'Producto terminado'),
-            ('SVC', 'Servicio'), ('SBP', 'Subproducto')                    
-            ]         
+            ('SVC', 'Servicio'), ('SBP', 'Subproducto')
+            ]
+
     FormaEntregaProveedor = [('P1','Entrega en nuestras instalaciones'),
         ('P2','Retira de las instalaciones del proveedor'),
-        ('P3', 'Entrega en expresso designado por nosotros')                                           
+        ('P3', 'Entrega en expresso designado por nosotros')
         ]
 
     #Datos generales
-    user = models.OneToOneField(User, blank=True, null=True)    
-    razon_social = models.CharField(max_length=50)
-    nombre_fantasia = models.CharField(verbose_name='Nombre de fantasía',max_length=50,blank=True, null=True)
+    user = models.OneToOneField(User, blank=True, null=True)
+    razon_social = models.CharField(max_length=200)
+    nombre_fantasia = models.CharField(verbose_name='Nombre de fantasía',max_length=200,blank=True, null=True)
     fecha_alta = models.DateField(auto_now_add=True)
     habilitado = models.BooleanField(default=True)
     telefono = models.CharField(max_length=50,blank=True, null=True)
     fax = models.CharField(max_length=50,blank=True, null=True)
     website = models.CharField(max_length=100,blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
-    tipo = models.CharField(max_length=3, choices=TipoProveedor,blank=True, null=True)
+    tipo = models.ForeignKey(TipoClasificador, blank=True, null=True)
     direccion = models.CharField(max_length=100,blank=True, null=True)
     codigo_postal = models.CharField(max_length=10,blank=True, null=True)
     pais = models.ForeignKey(Pais,blank=True, null=True)
     provincia = models.ForeignKey(Provincia,blank=True, null=True)
     localidad = models.ForeignKey(Localidad,blank=True, null=True)
-    contactos = models.ManyToManyField(Contacto,blank=True)    
-    
+    contactos = models.ManyToManyField(Contacto,blank=True)
+    r = models.BooleanField(default=False)
+    e = models.BooleanField(default=False)
+    primeros_4_digitos = models.PositiveSmallIntegerField(blank=True, null=True, validators=[MaxValueValidator(9999, message="Hasta 4 digitos.")])
     #Datos comerciales
-    cuit = models.CharField(max_length=11, blank=True, null=True, validators=[RegexValidator(r'^\d{1,11}$',message="No cumple con el formato de CUIT/CUIL")])    
+    cuit = models.CharField(max_length=13, blank=True, null=True)#, validators=[RegexValidator(r'^\d{1,11}$',message="No cumple con el formato de CUIT/CUIL")])
     condicion_comercial = models.ForeignKey(CondicionComercial,blank=True, null=True)
     forma_entrega =  models.CharField(verbose_name='Forma de entrega',max_length=3, choices=FormaEntregaProveedor,blank=True, null=True)
     iva = models.CharField(verbose_name='Condición frente al IVA',max_length=3, choices=IVA,blank=True, null=True)
-    tipo_factura = models.ForeignKey(Comprobantes,blank=True, null=True)    
+    tipo_factura = models.ForeignKey(Comprobantes,blank=True, null=True)
     corredor = models.BooleanField(default=False)
     indirecto = models.BooleanField(default=False)
     agente_perc_iibb = models.BooleanField(verbose_name='Agente percepcion de IIBB',default=False)
     agente_perc_iigg = models.BooleanField(verbose_name='Agente percepcion de IIGG',default=False)
     agente_perc_iva = models.BooleanField(verbose_name='Agente percepcion de IVA',default=False)
     agente_perc_ss = models.BooleanField(verbose_name='Agente percepcion de seguridad social',default=False)
-            
+
     def __str__(self):
         return self.razon_social
 
     def __unicode__(self):
         return self.razon_social
-        
+
     class Meta:
         ordering = ["razon_social", "nombre_fantasia"]
-        verbose_name_plural = " Proveedores"        
+        verbose_name_plural = " Proveedores"
 
 class Atributo(models.Model):
-    titulo = models.CharField(max_length=50)    
-    
+    titulo = models.CharField(max_length=50)
+
     def __str__(self):
         return self.titulo
 
     def __unicode__(self):
         return self.titulo
-        
+
     class Meta:
         ordering = ("titulo",)
-        verbose_name_plural = "Atributos"   
-    
-class Bien(models.Model): 
+        verbose_name_plural = "Atributos"
+
+class Bien(models.Model):
     Unidad = [('UN','Unidades'),('KG','Kilogramos'),('MT','Metros'),('LT','Litros')]
-          
+
     codigo = models.CharField(max_length=50)
     denominacion = models.CharField(max_length=100)
     habilitado = models.BooleanField(default=True)
@@ -256,13 +259,10 @@ class Bien(models.Model):
     forma_abastecimiento = models.ForeignKey(Abastecimiento)
     importado = models.BooleanField(default=False)
     sin_stock = models.BooleanField(default=False)
-    r = models.BooleanField(default=False)
-    e = models.BooleanField(default=False)
-    primeros_4_digitos = models.IntegerField(blank=True, null=True, validators=[MaxValueValidator(9999, message="Hasta 4 digitos.")])
     marca = models.ForeignKey(Marca)
     bulto = models.DecimalField (max_digits=10, decimal_places=2)
     tags = models.CharField(max_length=100, blank=True, null=True)
-    imagen1 = models.ImageField(verbose_name='Imagen principal', upload_to='Bien/', default='Bien/none.png')    
+    imagen1 = models.ImageField(verbose_name='Imagen principal', upload_to='Bien/', default='Bien/none.png')
     imagen2 = models.ImageField(upload_to='Bien/', blank=True)
     imagen3 = models.ImageField(upload_to='Bien/', blank=True)
     imagen4 = models.ImageField(upload_to='Bien/', blank=True)
@@ -270,32 +270,32 @@ class Bien(models.Model):
     proveedor = models.ManyToManyField(Proveedor, through='Compra')
     visible = models.BooleanField(default=True, editable=False)
     atributos = models.ManyToManyField(Atributo, through='BienYAtributo')
-    
+
     def __str__(self):
         return "{0} ({1})".format(self.denominacion, self.codigo)
-    
+
     def costo_base_proveedor(self):
-        try: 
+        try:
             compra = Compra.objects.get(bien=self, base_costeo=True)
             return compra.get_costo_final()
         except MultipleObjectsReturned:
-            return 0       
+            return 0
         except ObjectDoesNotExist:
             return 0
-            
+
     def moneda(self):
-        try: 
+        try:
             compra = Compra.objects.get(bien=self, base_costeo=True)
             return compra.moneda
         except MultipleObjectsReturned:
-            return None       
+            return None
         except ObjectDoesNotExist:
             return None
-   
+
     def sign_id(self):
         signer = Signer()
         return signer.sign(self.id)
-        
+
     class Meta:
         ordering = ["codigo", "denominacion"]
         verbose_name_plural = " Bienes"
@@ -303,15 +303,15 @@ class Bien(models.Model):
 
 class BienYAtributo(models.Model):
     bien = models.ForeignKey(Bien)
-    atributo = models.ForeignKey(Atributo)    
+    atributo = models.ForeignKey(Atributo)
     texto = models.TextField(max_length=9000)
-    
-    class Meta:             
-        unique_together = ('bien', 'atributo') 
-    
+
+    class Meta:
+        unique_together = ('bien', 'atributo')
+
     def __str__(self):
-        return self.bien.denominacion  + "||" + self.atributo.titulo 
-        
+        return self.bien.denominacion  + "||" + self.atributo.titulo
+
 class Compra(models.Model):
     base_costeo = models.BooleanField()
     proveedor = models.ForeignKey(Proveedor)
@@ -324,17 +324,17 @@ class Compra(models.Model):
     dto1 = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     dto2 = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     dto3 = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
-      
+
     def __str__(self):
         return u"%s de: %s" %(self.bien, self.proveedor)
-    
-    def clean(self):                                      
-        if self.base_costeo and self.__class__.objects.filter(Q(base_costeo=True) & Q(bien=self.bien) & ~Q(proveedor=self.proveedor)).exists():# and not self._state:                    
+
+    def clean(self):
+        if self.base_costeo and self.__class__.objects.filter(Q(base_costeo=True) & Q(bien=self.bien) & ~Q(proveedor=self.proveedor)).exists():# and not self._state:
             raise ValidationError("Ya hay un proveedor de base de costeo para este bien.")
-        #super(Compra, self).clean(*args, **kwargs)        
+        #super(Compra, self).clean(*args, **kwargs)
         super(Compra, self).clean()
 
-    #def save(self, *args, **kwargs):    
+    #def save(self, *args, **kwargs):
     #    self.full_clean()
     #    return super(Compra, self).save(*args, **kwargs)
     def get_costo_final(self):
@@ -343,14 +343,14 @@ class Compra(models.Model):
            if dto:
                 costo = costo * (1-dto/100)
         return round(costo,2)
-        
-        
-    class Meta:             
-        unique_together = ('proveedor', 'bien')    
+
+
+    class Meta:
+        unique_together = ('proveedor', 'bien')
         verbose_name = "Costo de proveedor"
-        verbose_name_plural = "Costos de proveedores" 
-        permissions = (("action_proveedor", "Ejecutar acciones"),)   
-                
+        verbose_name_plural = "Costos de proveedores"
+        permissions = (("action_proveedor", "Ejecutar acciones"),)
+
 class Lista(models.Model):
     Tipo = [ ('VTA','Venta'),('VRA', 'Vidriera')]
 
@@ -359,29 +359,29 @@ class Lista(models.Model):
     fecha_vigencia = models.DateField(verbose_name="Fecha de entrada en vigencia")
     moneda = models.ForeignKey(Moneda, on_delete=models.SET_NULL, null=True)
     impuesto = models.ForeignKey(Impuesto, on_delete=models.SET_NULL, blank=True, null=True)
-    aclaraciones = models.TextField(null=True, blank=True) 
-    bienes = models.ManyToManyField(Bien, through='ListaYBien')   
-    clasificadores = models.ManyToManyField(Clasificador, through='ListaYClasificador') 
-    
+    aclaraciones = models.TextField(null=True, blank=True)
+    bienes = models.ManyToManyField(Bien, through='ListaYBien')
+    clasificadores = models.ManyToManyField(Clasificador, through='ListaYClasificador')
+
     class Meta:
         ordering = ["tipo", "nombre"]
         verbose_name_plural = " Listas"
         permissions = (("action_lista", "Ejecutar acciones"),)
 
-    
+
     def __str__(self):
         return self.nombre
-    
+
     def get_bienes(self, include_hidden=True, search_bien_id=None, search_string="", clasificador=None, cliente=None):
         if clasificador:
             lista_clasificador = list(self.listayclasificador_set.filter(clasificador=clasificador))
-            lista_bien = list(self.listaybien_set.filter(Q(bien__denominacion__icontains=search_string) | Q(bien__codigo__icontains=search_string), bien__clasificador = clasificador))        
+            lista_bien = list(self.listaybien_set.filter(Q(bien__denominacion__icontains=search_string) | Q(bien__codigo__icontains=search_string), bien__clasificador = clasificador))
         else:
             lista_clasificador = list(self.listayclasificador_set.all())
             lista_bien = list(self.listaybien_set.filter(Q(bien__denominacion__icontains=search_string) | Q(bien__codigo__icontains=search_string)))
-                                                    
+
         bienes=[]
-        
+
         if cliente:
             if clasificador:
                 cliente_clasificador = cliente.clienteyclasificador_set.filter(clasificador=clasificador)
@@ -402,8 +402,8 @@ class Lista(models.Model):
                 if cl.margen > 0:
                     new_lista_clasificador = ListaYClasificador(clasificador=cl.clasificador, lista=self, margen=cl.margen, visible=cl.visible)
                     lista_clasificador.append(new_lista_clasificador)
-            
-            
+
+
             for w in lista_bien:
                 if not (not include_hidden and not w.visible):
                     if not cliente_clasificador.filter(clasificador=w.bien.clasificador).exists():
@@ -414,40 +414,40 @@ class Lista(models.Model):
                                 break
                     else:
                         w.margen = -1
-                        
+
             for bi in cliente_bien:
                 if bi.margen > 0:
                     new_lista_bien = ListaYBien(bien=bi.bien, lista=self, margen=bi.margen, visible=bi.visible)
-                    lista_bien.append(new_lista_bien)      
-                    
-                                       
+                    lista_bien.append(new_lista_bien)
+
+
         for l in lista_clasificador:
             if not (not include_hidden and not l.visible):
-                for b in l.clasificador.bien_set.filter(Q(denominacion__icontains=search_string) | Q(codigo__icontains=search_string) | Q(clasificador__denominacion__icontains=search_string)):                      
-                    for z in lista_bien:                
-                        if z.bien == b and z.margen > 0:                    
-                            b.costo = self.calcular_costo(costo=b.costo, margen=z.margen, moneda=z.bien.moneda())                            
+                for b in l.clasificador.bien_set.filter(Q(denominacion__icontains=search_string) | Q(codigo__icontains=search_string) | Q(clasificador__denominacion__icontains=search_string)):
+                    for z in lista_bien:
+                        if z.bien == b and z.margen > 0:
+                            b.costo = self.calcular_costo(costo=b.costo, margen=z.margen, moneda=z.bien.moneda())
                             z.margen = -1
                             break
                     else: #FOR-ELSE, not IF-ELSE!
                         b.costo = self.calcular_costo(costo=b.costo, margen=l.margen, moneda=b.moneda())
-                    
+
                     if b.id == search_bien_id:
                         return b
                     bienes.append(b)
-                
+
         for w in lista_bien:
             if not (not include_hidden and not w.visible):
                 if w.margen > 0:
                     w.bien.costo = self.calcular_costo(costo=w.bien.costo, margen=w.margen, moneda=w.bien.moneda())
                     w.bien.visible = w.visible
-                
+
                     if w.bien.id == search_bien_id:
-                        return w.bien                    
-                    bienes.append(w.bien)    
-        
+                        return w.bien
+                    bienes.append(w.bien)
+
         return sorted(bienes, key=operator.attrgetter('denominacion'))
-            
+
     def calcular_costo(self, costo, margen, moneda):
         try:
             if self.impuesto:
@@ -456,31 +456,31 @@ class Lista(models.Model):
                 impuesto = 1
             if moneda.moneda == self.moneda.moneda:
                 return round(costo * (1+(margen/100)) * impuesto,2)
-            else:    
+            else:
                 return round((costo * (1+(margen/100)) * moneda.cotizacion / self.moneda.cotizacion) * impuesto,2)
         except:
             return 0
-            
+
 class ListaYBien(models.Model):
     bien = models.ForeignKey(Bien, on_delete=models.CASCADE )
-    lista = models.ForeignKey(Lista, on_delete=models.CASCADE)        
+    lista = models.ForeignKey(Lista, on_delete=models.CASCADE)
     margen = models.DecimalField(max_digits=10, decimal_places=2)
     visible = models.BooleanField(default = True)
 
-    class Meta:             
-        unique_together = ('lista', 'bien') 
-    
+    class Meta:
+        unique_together = ('lista', 'bien')
+
     def __str__(self):
         return self.lista.nombre + "||" + self.bien.denominacion
-    
-class ListaYClasificador(models.Model): 
+
+class ListaYClasificador(models.Model):
     clasificador = models.ForeignKey(Clasificador, on_delete=models.CASCADE)
-    lista = models.ForeignKey(Lista, on_delete=models.CASCADE)        
+    lista = models.ForeignKey(Lista, on_delete=models.CASCADE)
     #margen = models.DecimalField(max_digits=3, decimal_places=2, validators=[MaxValueValidator(1, message="El descuento tiene que estar entre 0 y 1."),MinValueValidator(0, message="El descuento tiene que estar entre 0 y 1.")])
     margen = models.DecimalField(max_digits=10, decimal_places=2)
     visible = models.BooleanField(default = True)
-        
-    class Meta:             
+
+    class Meta:
         unique_together = ('lista', 'clasificador')
 
     def __str__(self):
@@ -490,22 +490,22 @@ class Expreso(models.Model):
     denominacion = models.CharField(max_length=50 )
     direccion = models.CharField(max_length=100,blank=True, null=True)
     telefono = models.CharField(max_length=50,blank=True, null=True)
-    
+
     def __str__(self):
         return self.denominacion
-        
-class Cliente(models.Model):  
+
+class Cliente(models.Model):
 
     FormaEntregaCliente = [('C1','Retira de nuestras instalaciones'),
         ('C2','Entrega en las instalaciones del cliente'),
-        ('C3', 'Entrega en expresso indicado por el cliente')                                           
-    ] 
-        
+        ('C3', 'Entrega en expresso indicado por el cliente')
+    ]
+
     #Datos generales
     user = models.OneToOneField(User, blank=True, null=True)
     lista = models.ForeignKey(Lista, on_delete=models.SET_NULL, null=True)
-    razon_social = models.CharField(max_length=50)
-    nombre_fantasia = models.CharField(max_length=50,blank=True, null=True)
+    razon_social = models.CharField(max_length=200)
+    nombre_fantasia = models.CharField(max_length=200,blank=True, null=True)
     rubro = models.ForeignKey(Rubro)
     fecha_alta = models.DateField(auto_now_add=True)
     habilitado = models.BooleanField(help_text=_("Editable solo por admin"), default=False)
@@ -514,16 +514,16 @@ class Cliente(models.Model):
     telefono = models.CharField(verbose_name="teléfono oficial", max_length=50,blank=True, null=True)
     email = models.EmailField(verbose_name="email oficial", max_length=50,blank=True, null=True)
     website = models.CharField( max_length=100,blank=True, null=True)
-    direccion = models.CharField(max_length=100,blank=True, null=True)            
+    direccion = models.CharField(max_length=100,blank=True, null=True)
     codigo_postal = models.CharField(max_length=10,blank=True, null=True)
     pais = models.ForeignKey(Pais,blank=True, null=True)
     provincia = models.ForeignKey(Provincia,blank=True, null=True)
-    localidad = models.ForeignKey(Localidad,blank=True, null=True)
-    contactos = models.ManyToManyField(Contacto,blank=True)        
-       
+    localidad = models.ForeignKey(Localidad,blank=True, null=True, related_name='cliente_localidad')
+    contactos = models.ManyToManyField(Contacto,blank=True)
+
     #Datos comerciales
-    cuit = models.CharField(max_length=11, blank=True, null=True, validators=[RegexValidator(r'^\d{1,11}$',message="No cumple con el formato de CUIT/CUIL")])
-    comprobante_cuit = models.CharField(max_length=50, blank=True, null=True)    
+    cuit = models.CharField(max_length=13, blank=True, null=True)#, validators=[RegexValidator(r'^\d{1,11}$',message="No cumple con el formato de CUIT/CUIL")])
+    comprobante_cuit = models.CharField(max_length=50, blank=True, null=True)
     condicion_comercial = models.ForeignKey(CondicionComercial, blank=True, null=True)
     informe_economico = models.CharField(max_length=200, blank=True, null=True)
     limite_credito = models.DecimalField(verbose_name="Límite de crédito", max_digits=10, decimal_places=2,blank=True, null=True)
@@ -531,13 +531,13 @@ class Cliente(models.Model):
     forma_entrega =  models.CharField(max_length=3, choices=FormaEntregaCliente,blank=True, null=True)
     alerta = models.TextField(max_length=1000,blank=True, null=True)
     mayorista = models.BooleanField(default=False)
-    tipo_factura = models.ForeignKey(Comprobantes, blank=True, null=True)    
+    tipo_factura = models.ForeignKey(Comprobantes, blank=True, null=True)
     agente_perc_iibb = models.BooleanField(verbose_name='Agente percepcion de IIBB',default=False)
     agente_perc_iigg = models.BooleanField(verbose_name='Agente percepcion de IIGG',default=False)
     agente_perc_iva = models.BooleanField(verbose_name='Agente percepcion de IVA',default=False)
     agente_perc_ss = models.BooleanField(verbose_name='Agente percepcion de seguridad social',default=False)
-    jurisdiccion_iibb = models.CharField(max_length=50,blank=True, null=True) 
-    
+    jurisdiccion_iibb = models.ForeignKey(Localidad,blank=True, null=True, related_name='jurisdiccion_localidad')
+
     def __str__(self):
         return self.razon_social
 
@@ -549,11 +549,11 @@ class Cliente(models.Model):
 
 class ClienteYClasificador(models.Model):
     clasificador = models.ForeignKey(Clasificador, on_delete=models.CASCADE)
-    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)        
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
     margen = models.DecimalField(max_digits=10, decimal_places=2)
     visible = models.BooleanField(default = True)
-        
-    class Meta:             
+
+    class Meta:
         unique_together = ('cliente', 'clasificador')
 
     def __str__(self):
@@ -561,16 +561,16 @@ class ClienteYClasificador(models.Model):
 
 class ClienteYBien(models.Model):
     bien = models.ForeignKey(Bien, on_delete=models.CASCADE )
-    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)        
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
     margen = models.DecimalField(max_digits=10, decimal_places=2)
     visible = models.BooleanField(default = True)
 
-    class Meta:             
-        unique_together = ('cliente', 'bien') 
-    
+    class Meta:
+        unique_together = ('cliente', 'bien')
+
     def __str__(self):
         return self.cliente.razon_social + "||" + self.bien.denominacion
-        
+
 class Pedido(models.Model):
     #Status = [ ('ABR','Abierto'),('CHK', 'Confirmado por cliente'),('PRE', 'En preparación'), ('COM', 'Completo'), ('CAN', 'Cancelado')]
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
@@ -582,16 +582,16 @@ class Pedido(models.Model):
     validado_x_admin = models.BooleanField(verbose_name='Validado',help_text=_("Editable solo por admin"),default = False)
     bienes = models.ManyToManyField(Bien, through='PedidoYBien')
     vendedor = models.ForeignKey(Proveedor, on_delete=models.SET_NULL, null=True, blank=True, limit_choices_to={'corredor':True})
-    observaciones = models.TextField(null=True, blank=True) 
+    observaciones = models.TextField(null=True, blank=True)
     presupuesto = models.BooleanField(verbose_name='Es Presupuesto?', default=False)
-    
-    def get_precio_total(self):   
+
+    def get_precio_total(self):
         total = 0
         for pedidoybien in self.pedidoybien_set.all():
             total += pedidoybien.precio_con_descuento() * pedidoybien.cantidad_solicitada
         return total
 
-    def get_costo_total(self):   
+    def get_costo_total(self):
         total = 0
         for pedidoybien in self.pedidoybien_set.all():
             total += pedidoybien.bien.costo * pedidoybien.cantidad_solicitada
@@ -617,10 +617,10 @@ class Pedido(models.Model):
             return False
     pendientes.boolean = True
     pendientes.short_description = 'Estado pendientes'
-    
+
     def checkout(self):
         self.confirmado_x_cliente = True
-            
+
     def __str__(self):
         return "{0} #{1}".format(str(self.cliente), self.id)
 
@@ -630,7 +630,7 @@ class Pedido(models.Model):
     class Meta:
         verbose_name_plural = " Pedidos"
         permissions = (("action_pedido", "Ejecutar acciones"),)
-                
+
 class PedidoYBien(models.Model):
     pedido = models.ForeignKey(Pedido)
     bien = models.ForeignKey(Bien)
@@ -638,7 +638,7 @@ class PedidoYBien(models.Model):
     precio = models.DecimalField(max_digits=10, decimal_places=2, blank=True)
     descuento = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     observaciones = models.CharField(max_length=100, null=True, blank=True)
-        
+
     def precio_con_descuento(self):
         if self.descuento:
             dto = 1-(self.descuento/100)
@@ -646,10 +646,10 @@ class PedidoYBien(models.Model):
             dto = 1
         precio = round(self.precio * dto,2)
         return precio or 0
-        
+
     def subtotal(self):
         return self.precio * self.cantidad_solicitada
-    
+
     def subtotal_pendiente(self):
         return self.precio * self.cantidad_pendiente()
 
@@ -674,7 +674,7 @@ class PedidoYBien(models.Model):
             return None
 
     def entregado(self):
-        cant_entregada = self.cantidad_entregada()         
+        cant_entregada = self.cantidad_entregada()
         return True if cant_entregada >= self.cantidad_solicitada else False
 
     def __str__(self):
@@ -683,8 +683,8 @@ class PedidoYBien(models.Model):
     def __unicode__(self):
         return "{0}, bien: {1}, cant: {2}".format(self.pedido, self.bien, self.cantidad_solicitada)
 
-    class Meta:             
-        unique_together = ('pedido', 'bien') 
+    class Meta:
+        unique_together = ('pedido', 'bien')
         verbose_name_plural = _(" Pedidos (items pendientes)")
 
 class Proforma(models.Model):
@@ -702,9 +702,9 @@ class Proforma(models.Model):
     def __unicode__(self):
         return "{0}#{1} {2}".format(self.cliente, self.id, self.fecha_creacion)
 
-    class Meta:             
+    class Meta:
         verbose_name_plural = _(" Proformas")
-        permissions = (("action_proforma", "Ejecutar acciones"),)   
+        permissions = (("action_proforma", "Ejecutar acciones"),)
 
 class ProformaYBien(models.Model):
     proforma = models.ForeignKey(Proforma)
@@ -717,6 +717,5 @@ class ProformaYBien(models.Model):
     def __unicode__(self):
         return "{0} {1} x {2}".format(self.proforma,self.item, self.cantidad)
 
-    class Meta:             
-        unique_together = ('proforma', 'item') 
-    
+    class Meta:
+        unique_together = ('proforma', 'item')
