@@ -111,7 +111,7 @@ class BienAdmin(admin.ModelAdmin):
             return format_html('<span style="color: #{0};">{1}</span>',color,obj.costo_base_proveedor())
     costo_base_proveedor_colored.short_description = 'COSTO PROVEEDOR'
 
-    fieldsets = ((None, {'fields':('codigo', 'denominacion', 'habilitado', 'costo', 'unidad', 'clasificador', 'forma_abastecimiento', 'importado', 'sin_stock','marca', 'bulto')}),
+    fieldsets = ((None, {'fields':('codigo', 'denominacion', 'habilitado', 'costo', 'clasificador', 'forma_abastecimiento', 'importado', 'sin_stock','marca', 'bulto', 'unidad', 'stock_min', 'stock_max', 'lote_optim', 'ubicacion', 'peso', 'volumen')}),
                  ('Imagenes', {'classes':('collapse',), 'fields':('imagen1', 'imagen2','imagen3','imagen4','imagen5')}),
     )
 
@@ -287,7 +287,7 @@ class PedidoItemsAdmin(admin.ModelAdmin):
 
     readonly_fields = (cant_pendiente, precio_total, fecha_prevista_entrega)
     list_display = ('pedido', 'bien', cant_pendiente,precio_total,'observaciones', fecha_prevista_entrega)
-    list_filter = ('bien__clasificador', 'bien__clasificador__rubro__denominacion')#ItemsPendientesListFilter,)
+    list_filter = ('bien__clasificador', 'bien__clasificador__rubro__rubro')#ItemsPendientesListFilter,)
     search_fields = ('pedido__cliente__razon_social','bien__clasificador__denominacion','bien__denominacion', 'bien__codigo')
     #ordering = (fecha_prevista_entrega)
     #list_editable = ('costo','dto1', 'dto2', 'dto3')

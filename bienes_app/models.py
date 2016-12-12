@@ -119,14 +119,25 @@ class Marca(models.Model):
     class Meta:
         ordering = ["denominacion"]
 
+class Division(models.Model):
+    division = models.CharField(max_length=200)
+    imagen =  models.CharField(max_length=200)
+    orden = models.PositiveSmallIntegerField(blank=True, null=True)
+
 class Rubro(models.Model):
-    denominacion = models.CharField(max_length=50)
+    Tipoi = [('NULO','Nulo'),('MEDIO','Medio'),('COMPLETO','Completo'),]
+    
+    rubro = models.CharField(max_length=200)
+    orden = models.PositiveSmallIntegerField(blank=True, null=True)
+    imagen =  models.CharField(max_length=200)
+    tipoi =  models.CharField(max_length=200, choices=Tipoi, )
+    division =  models.ForeignKey(Division, blank=True, null=True)
 
     def __str__(self):
         return self.denominacion
 
     class Meta:
-        ordering = ["denominacion"]
+        ordering = ["rubro"]
         verbose_name_plural = "Rubros"
 
 class Clasificador(models.Model):
@@ -251,16 +262,16 @@ class Bien(models.Model):
     Unidad = [('UN','Unidades'),('KG','Kilogramos'),('MT','Metros'),('LT','Litros')]
 
     codigo = models.CharField(max_length=50)
-    denominacion = models.CharField(max_length=100)
+    denominacion = models.CharField(max_length=200)
     habilitado = models.BooleanField(default=True)
-    costo = models.DecimalField(max_digits=10, decimal_places=2)
-    unidad = models.CharField(max_length=5, choices=Unidad, default='UN')
-    clasificador = models.ForeignKey(Clasificador)
-    forma_abastecimiento = models.ForeignKey(Abastecimiento)
+    costo = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    unidad = models.CharField(max_length=5, choices=Unidad, default='UN', blank=True, null=True)
+    clasificador = models.ForeignKey(Clasificador, blank=True, null=True)
+    forma_abastecimiento = models.ForeignKey(Abastecimiento, blank=True, null=True)
     importado = models.BooleanField(default=False)
     sin_stock = models.BooleanField(default=False)
-    marca = models.ForeignKey(Marca)
-    bulto = models.DecimalField (max_digits=10, decimal_places=2)
+    marca = models.ForeignKey(Marca, blank=True, null=True)
+    bulto = models.DecimalField (max_digits=10, decimal_places=2, blank=True, null=True)
     tags = models.CharField(max_length=100, blank=True, null=True)
     imagen1 = models.ImageField(verbose_name='Imagen principal', upload_to='Bien/', default='Bien/none.png')
     imagen2 = models.ImageField(upload_to='Bien/', blank=True)
@@ -270,6 +281,12 @@ class Bien(models.Model):
     proveedor = models.ManyToManyField(Proveedor, through='Compra')
     visible = models.BooleanField(default=True, editable=False)
     atributos = models.ManyToManyField(Atributo, through='BienYAtributo')
+    stock_min = models.DecimalField (max_digits=10, decimal_places=2, blank=True, null=True)
+    stock_max = models.DecimalField (max_digits=10, decimal_places=2, blank=True, null=True)
+    lote_optim = models.DecimalField (max_digits=10, decimal_places=2, blank=True, null=True)
+    ubicacion = models.CharField(max_length=100, blank=True, null=True)
+    peso = models.DecimalField (max_digits=10, decimal_places=2,blank=True, null=True)
+    volumen = models.DecimalField (max_digits=10, decimal_places=2, blank=True, null=True)
 
     def __str__(self):
         return "{0} ({1})".format(self.denominacion, self.codigo)
