@@ -117,7 +117,7 @@
                         <ul class="nav navbar-nav">
                             <li {% if active == 'index' %}class="active" {% endif %}><a href="/">{% trans "Inicio" %}</a></li>
                             <li {% if active == 'vidriera' %}class="active" {% endif %}><a href="/vidriera/">{% trans "Vidriera" %}</a></li>
-                            {% if request.user.is_authenticated %}<li {% if active == 'pedido' %}class="active" {% endif %}><a  href="/pedido/" >{% trans "Mis pedidos" %}</a></li> {% endif %}
+                            {% if request.user.is_authenticated and request.user.cliente %}<li {% if active == 'pedido' %}class="active" {% endif %}><a  href="/pedido/" >{% trans "Mis pedidos" %}</a></li> {% endif %}
                             <li {% if active == 'contacto' %}class="active" {% endif %}><a href="/contacto">{% trans "Contacto" %}</a></li>
                         </ul>
                     </div>  

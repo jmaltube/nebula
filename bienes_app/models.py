@@ -109,6 +109,7 @@ class Abastecimiento(models.Model):
 
 class Marca(models.Model):
     denominacion = models.CharField(max_length=50)
+    imagen = models.ImageField(upload_to='Marca/', blank=True, null=True)
 
     def __str__(self):
         return self.denominacion
@@ -129,12 +130,12 @@ class Rubro(models.Model):
     
     rubro = models.CharField(max_length=200)
     orden = models.PositiveSmallIntegerField(blank=True, null=True)
-    imagen =  models.CharField(max_length=200)
-    tipoi =  models.CharField(max_length=200, choices=Tipoi, )
-    division =  models.ForeignKey(Division, blank=True, null=True)
+    imagen = models.ImageField(upload_to='Rubro/', blank=True, null=True)
+    tipoi =  models.CharField(max_length=200, choices=Tipoi, blank=True, null=True)
+    division = models.ForeignKey(Division, blank=True, null=True)
 
     def __str__(self):
-        return self.denominacion
+        return self.rubro
 
     class Meta:
         ordering = ["rubro"]
